@@ -10,7 +10,6 @@ export default async function PaysPage() {
     <div>
       <div className="wiki-page-header">
         <h1 className="text-4xl font-bold mb-2" style={{ fontFamily: 'var(--font-heading)', letterSpacing: '0.12em' }}>Les Pays</h1>
-        <p className="text-sm italic" style={{ color: 'var(--ink-muted)' }}>Les quatre nations qui façonnent le monde de Minamix</p>
       </div>
 
       {user && (
