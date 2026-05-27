@@ -114,17 +114,9 @@ export function RyximusDetailClient({ ryximus: initial, allRyximus, isLoggedIn }
           </div>
         </div>
 
-        {editing ? (
-          <input value={draft.citation} onChange={(e) => setDraft((d) => ({ ...d, citation: e.target.value }))} className="mt-6 w-full border border-white/40 rounded-lg px-3 py-2 bg-white/20 text-white italic focus:outline-none" placeholder="Citation…" />
-        ) : (
-          <blockquote className="mt-6 border-l-4 border-white/50 pl-4 italic opacity-90">
-            &ldquo;{draft.citation}&rdquo;
-          </blockquote>
-        )}
       </div>
 
       <div className="space-y-5">
-        {field('description', 'Description')}
         {field('personnalite', 'Personnalité')}
 
         <div className="wiki-card p-6 border-l-4" style={{ borderColor: draft.couleur }}>

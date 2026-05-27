@@ -17,8 +17,6 @@ export default function NouveauRyximusPage() {
   const [couleur, setCouleur] = useState('#747474')
   const [genre, setGenre] = useState<'Masculin' | 'Féminin'>('Masculin')
   const [element, setElement] = useState('')
-  const [citation, setCitation] = useState('')
-  const [description, setDescription] = useState('')
   const [personnalite, setPersonnalite] = useState('')
   const [conditionPacte, setConditionPacte] = useState('')
 
@@ -28,7 +26,7 @@ export default function NouveauRyximusPage() {
     setSaving(true)
     const slug = toSlug(nom)
     try {
-      await upsertRyximus(slug, { nom, couleur, genre, element, image: '', citation, description, personnalite, conditionPacte })
+      await upsertRyximus(slug, { nom, couleur, genre, element, image: '', personnalite, conditionPacte })
       router.push(`/ryximus/${slug}`)
       router.refresh()
     } catch {
@@ -70,14 +68,9 @@ export default function NouveauRyximusPage() {
               </select>
             </div>
           </div>
-          <div>
-            <label className="block text-sm font-semibold mb-1">Citation</label>
-            <input value={citation} onChange={(e) => setCitation(e.target.value)} className="w-full border rounded-lg px-3 py-2 focus:outline-none" placeholder="Citation caractéristique…" />
-          </div>
         </div>
 
         {[
-          ['Description', description, setDescription],
           ['Personnalité', personnalite, setPersonnalite],
           ['Condition du Pacte', conditionPacte, setConditionPacte],
         ].map(([label, value, setter]) => (
