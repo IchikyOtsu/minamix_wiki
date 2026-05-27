@@ -122,50 +122,7 @@ export function PaysDetailClient({ pays: initial, allPays, isLoggedIn }: Props) 
         {field('modeDeVie', 'Mode de vie')}
         {(draft.magie || editing) && field('magie', 'Magie')}
 
-        {/* Traditions */}
-        <div className="wiki-card p-6">
-          <h3 className="wiki-section-title">Traditions</h3>
-          {editing ? (
-            <div className="space-y-3">
-              {draft.traditions.map((t, i) => (
-                <div key={i} className="flex gap-2 items-start border border-gray-200 rounded-lg p-3 bg-gray-50/50">
-                  <div className="flex-1 space-y-2">
-                    <input
-                      value={t.nom}
-                      onChange={(e) => setDraft((d) => {
-                        const tr = [...d.traditions]; tr[i] = { ...tr[i], nom: e.target.value }; return { ...d, traditions: tr }
-                      })}
-                      className="w-full border border-gray-200 rounded px-2.5 py-1.5 text-sm font-semibold focus:outline-none focus:border-gray-400"
-                      placeholder="Nom de la tradition"
-                    />
-                    <input
-                      value={t.description}
-                      onChange={(e) => setDraft((d) => {
-                        const tr = [...d.traditions]; tr[i] = { ...tr[i], description: e.target.value }; return { ...d, traditions: tr }
-                      })}
-                      className="w-full border border-gray-200 rounded px-2.5 py-1.5 text-sm focus:outline-none focus:border-gray-400"
-                      placeholder="Description"
-                    />
-                  </div>
-                  <button type="button" onClick={() => setDraft((d) => ({ ...d, traditions: d.traditions.filter((_, j) => j !== i) }))} className="text-red-400 hover:text-red-600 text-xl leading-none px-1 mt-1">×</button>
-                </div>
-              ))}
-              <button type="button" onClick={() => setDraft((d) => ({ ...d, traditions: [...d.traditions, { nom: '', description: '' }] }))} className="text-sm text-blue-600 hover:underline">
-                + Ajouter une tradition
-              </button>
-            </div>
-          ) : (
-            <ul className="space-y-3">
-              {draft.traditions.map((t) => (
-                <li key={t.nom} className="border-l-4 pl-4 py-0.5" style={{ borderColor: draft.couleur }}>
-                  <span className="font-semibold">{t.nom}</span>
-                  <span className="text-gray-700"> — {t.description}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
+        {field('traditions', 'Traditions')}
         {field('societe', 'Société')}
       </div>
 

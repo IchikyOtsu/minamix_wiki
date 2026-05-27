@@ -7,7 +7,7 @@ export interface Pays {
   politiqueInterne: string;
   politiqueExterne: string;
   modeDeVie: string;
-  traditions: { nom: string; description: string }[];
+  traditions: string;
   societe: string;
   magie?: string;
 }
@@ -27,22 +27,7 @@ export const pays: Pays[] = [
       "Les relations avec Lyndera sont marquées par des tensions diplomatiques autour de la cité-État de Frimaz. Ilonaï est ignorée. Les tensions avec Frimaz portent sur le commerce et les intérêts militaires.",
     modeDeVie:
       "La technologie est comparable au Moyen-Âge. La magie est intégrée dans la vie quotidienne avec une accessibilité variable selon la classe sociale. La médecine repose sur les remèdes à base de plantes et les pratiques traditionnelles.",
-    traditions: [
-      {
-        nom: "Le Rite",
-        description: "Compétition bisannuelle pour les jeunes mages.",
-      },
-      {
-        nom: "La Communion",
-        description:
-          "Festival annuel d'une semaine pour remercier les éléments de la nature.",
-      },
-      {
-        nom: "Tasi",
-        description:
-          "Tradition de dons basée sur la légende de deux amants des clans de lumière et d'obscurité.",
-      },
-    ],
+    traditions: "<ul><li><strong>Le Rite</strong> — Compétition bisannuelle pour les jeunes mages.</li><li><strong>La Communion</strong> — Festival annuel d'une semaine pour remercier les éléments de la nature.</li><li><strong>Tasi</strong> — Tradition de dons basée sur la légende de deux amants des clans de lumière et d'obscurité.</li></ul>",
     societe:
       "Trois classes sociales : nobles et riches (moins de 15 %), bourgeoisie et classe moyenne (environ 30 %), peuple commun (environ 55 %).",
   },
@@ -60,25 +45,7 @@ export const pays: Pays[] = [
       "Les relations avec Silfus sont froides. Lyndera considère Ilonaï comme un territoire à conquérir pour ses ressources. Frimaz est ciblée pour une influence diplomatique et économique.",
     modeDeVie:
       "La technologie reste rudimentaire, axée sur l'artisanat, notamment la métallurgie et la fabrication d'armes. L'architecture est fortifiée. Solvernia est la ville principale avec des quartiers organisés par clans.",
-    traditions: [
-      {
-        nom: "Arena Fight",
-        description: "Tournoi annuel déterminant la direction du pays.",
-      },
-      {
-        nom: "Phaeton",
-        description:
-          "Tournoi pour sélectionner le Triumvirat (22-24 septembre).",
-      },
-      {
-        nom: "Aurae",
-        description: "Saison des amours au printemps.",
-      },
-      {
-        nom: "Tasi",
-        description: "Tradition de dons.",
-      },
-    ],
+    traditions: "<ul><li><strong>Arena Fight</strong> — Tournoi annuel déterminant la direction du pays.</li><li><strong>Phaeton</strong> — Tournoi pour sélectionner le Triumvirat (22-24 septembre).</li><li><strong>Aurae</strong> — Saison des amours au printemps.</li><li><strong>Tasi</strong> — Tradition de dons.</li></ul>",
     societe:
       "Structure hiérarchique basée sur la dynamique prédateur-proie. Les autres races sont tolérées mais subordonnées. Les clans familiaux sont fondamentaux. L'éducation est pratique et martiale.",
   },
@@ -96,21 +63,7 @@ export const pays: Pays[] = [
       "Commerce modéré avec Silfus. Relations tendues avec Lyndera en raison des occupations passées. Échanges fréquents mais informels avec Ilonaï.",
     modeDeVie:
       "Technologiquement avancée avec des systèmes d'égouts, des réseaux hydrauliques et des armes à poudre noire. L'architecture présente des bâtiments en pierre à plusieurs étages avec une infrastructure sophistiquée.",
-    traditions: [
-      {
-        nom: "Konoka",
-        description:
-          "Compétition trimestrielle d'entrée militaire pour les jeunes mages.",
-      },
-      {
-        nom: "Exposition annuelle",
-        description: "Vitrine technologique annuelle (fin mars).",
-      },
-      {
-        nom: "Tasi",
-        description: "Tradition de dons.",
-      },
-    ],
+    traditions: "<ul><li><strong>Konoka</strong> — Compétition trimestrielle d'entrée militaire pour les jeunes mages.</li><li><strong>Exposition annuelle</strong> — Vitrine technologique annuelle (fin mars).</li><li><strong>Tasi</strong> — Tradition de dons.</li></ul>",
     societe:
       "Nobles et riches (20 %), bourgeoisie et classe moyenne (40 %), peuple commun (40 %) engagé dans le travail manuel et de services.",
   },
@@ -130,22 +83,7 @@ export const pays: Pays[] = [
       "Technologie simple et durable axée sur le tir à l'arc, les remèdes à base de plantes et l'artisanat du bois. Les habitats s'intègrent dans la nature à travers des villages dans les arbres, des habitations en flanc de colline et des campements temporaires.",
     magie:
       "La magie est intuitive, basée sur les émotions et liée à la nature plutôt qu'à l'étude académique. Il n'y a pas d'académies ; les anciens guident les jeunes praticiens. La magie évite la destruction et met l'accent sur l'équilibre naturel.",
-    traditions: [
-      {
-        nom: "Shyke",
-        description:
-          "Dernier jour de récolte pour remercier les Ryximus et les agriculteurs.",
-      },
-      {
-        nom: "Solstices et Équinoxes",
-        description:
-          "Quatre célébrations saisonnières avec repas, vêtements et danses traditionnels.",
-      },
-      {
-        nom: "Tasi",
-        description: "Tradition de dons.",
-      },
-    ],
+    traditions: "<ul><li><strong>Shyke</strong> — Dernier jour de récolte pour remercier les Ryximus et les agriculteurs.</li><li><strong>Solstices et Équinoxes</strong> — Quatre célébrations saisonnières avec repas, vêtements et danses traditionnels.</li><li><strong>Tasi</strong> — Tradition de dons.</li></ul>",
     societe:
       "Communautés diverses basées sur les clans avec des structures familiales élargies. Les rôles sont assignés par l'âge et l'expérience. L'éducation est pratique et orale. Plus grande tolérance raciale que dans les pays voisins.",
   },
