@@ -1,26 +1,36 @@
-@import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400;1,600&display=swap");
 
 @import "tailwindcss";
 
 :root {
   --font-heading: "Cinzel", serif;
-  --font-body: "Crimson Text", "Verdana", sans-serif;
-  --bg-silver: #b8b8b8;
-  --nav-gray: #5a5a5a;
-  --gold: #b08c2a;
-  --card-bg: #fefefe;
+  --font-body:    "Crimson Text", Georgia, serif;
+
+  /* Parchment palette */
+  --parchment:      #ede3c8;
+  --parchment-dark: #ddd0a8;
+  --ink:            #1e1208;
+  --ink-muted:      #5a3c20;
+  --gold:           #b08c2a;
+  --gold-light:     #cca83a;
+  --gold-faint:     rgba(176, 140, 42, 0.10);
+  --card-bg:        #faf5e4;
+  --card-border:    rgba(160, 120, 50, 0.22);
+  --sepia:          rgba(80, 40, 8, 0.12);
 }
 
-/* ── Base ───────────────────────────────────────────────────── */
+/* ── Base ─────────────────────────────────────────────── */
 
 body {
-  background-color: var(--bg-silver);
+  background-color: var(--parchment);
   background-image:
-    radial-gradient(ellipse at 20% 0%, rgba(255,255,255,0.18) 0%, transparent 60%),
-    radial-gradient(ellipse at 80% 100%, rgba(0,0,0,0.08) 0%, transparent 55%);
+    radial-gradient(ellipse 75% 45% at 12%  4%, rgba(255, 244, 190, 0.50) 0%, transparent 60%),
+    radial-gradient(ellipse 55% 55% at 88% 96%, rgba(140,  80,  15, 0.12) 0%, transparent 55%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='250' height='250'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='250' height='250' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
   font-family: var(--font-body);
-  font-size: 1.05rem;
-  color: #1a1714;
+  font-size: 1.075rem;
+  line-height: 1.75;
+  color: var(--ink);
   margin-top: 64px;
   min-height: 100vh;
 }
@@ -28,66 +38,88 @@ body {
 h1, h2, h3, h4 {
   font-family: var(--font-heading);
   text-align: center;
+  color: var(--ink);
 }
 
-h3 {
-  text-decoration: underline;
+h3 { text-decoration: none; }
+
+@layer base {
+  a { color: inherit; }
 }
 
-a:visited {
-  color: #7b2d8b;
-}
+.wiki-content a:visited { color: var(--ink-muted); }
 
-/* ── Cards ──────────────────────────────────────────────────── */
+/* ── Cards ────────────────────────────────────────────── */
 
 .wiki-card {
   background: var(--card-bg);
-  border-radius: 0.75rem;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.08);
+  border: 1px solid var(--card-border);
+  border-radius: 0.5rem;
+  box-shadow:
+    0 1px 3px var(--sepia),
+    0 4px 24px rgba(80, 40, 8, 0.07),
+    inset 0 1px 0 rgba(255, 248, 210, 0.65);
   transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .wiki-card:hover {
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1), 0 8px 28px rgba(0,0,0,0.12);
+  box-shadow:
+    0 2px 6px var(--sepia),
+    0 8px 36px rgba(80, 40, 8, 0.11),
+    inset 0 1px 0 rgba(255, 248, 210, 0.65);
 }
 
-/* ── Section titles ─────────────────────────────────────────── */
+/* Decorative double-border variant used for the intro/scroll card */
+.wiki-scroll {
+  position: relative;
+}
+.wiki-scroll::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: 1px solid rgba(176, 140, 42, 0.18);
+  border-radius: 0.25rem;
+  pointer-events: none;
+}
+
+/* ── Section titles ───────────────────────────────────── */
 
 .wiki-section-title {
   font-family: var(--font-heading);
-  font-size: 1.5rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  color: #1a1714;
+  font-size: 1.3rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--ink);
   text-align: left;
-  position: relative;
-  padding-bottom: 0.5rem;
+  padding-bottom: 0.55rem;
   margin-bottom: 1.25rem;
+  border-bottom: 1px solid var(--card-border);
+  position: relative;
 }
 
 .wiki-section-title::after {
   content: '';
-  display: block;
   position: absolute;
-  bottom: 0;
+  bottom: -1px;
   left: 0;
-  width: 3rem;
+  width: 2.5rem;
   height: 2px;
   background: var(--gold);
   border-radius: 2px;
 }
 
-/* ── Decorative divider ─────────────────────────────────────── */
+/* ── Decorative divider ───────────────────────────────── */
 
 .wiki-divider {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  margin: 2rem 0;
-  color: rgba(26,23,20,0.3);
+  gap: 1rem;
+  margin: 2.5rem 0;
+  color: var(--gold);
   font-family: var(--font-heading);
-  font-size: 0.85rem;
-  letter-spacing: 0.2em;
+  font-size: 0.72rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
 }
 
 .wiki-divider::before,
@@ -95,60 +127,70 @@ a:visited {
   content: '';
   flex: 1;
   height: 1px;
-  background: linear-gradient(to right, transparent, rgba(26,23,20,0.25), transparent);
+  background: linear-gradient(to right, transparent, var(--gold-light), transparent);
+  opacity: 0.5;
 }
 
-/* ── Navigation ─────────────────────────────────────────────── */
+/* ── Navigation ───────────────────────────────────────── */
 
 nav {
   backdrop-filter: blur(4px);
 }
 
-/* ── Buttons ────────────────────────────────────────────────── */
+/* ── Buttons ──────────────────────────────────────────── */
 
 .btn-wiki {
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
-  padding: 0.4rem 0.875rem;
-  border-radius: 0.375rem;
-  font-size: 0.8125rem;
+  padding: 0.4rem 0.9rem;
+  border-radius: 0.3rem;
+  font-family: var(--font-heading);
+  font-size: 0.75rem;
   font-weight: 600;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.08em;
   transition: all 0.15s ease;
   cursor: pointer;
+  border: 1px solid transparent;
 }
 
 .btn-wiki-primary {
-  background: var(--nav-gray);
-  color: white;
+  background: linear-gradient(160deg, #7d5c12 0%, var(--gold) 100%);
+  color: #fdf8ee;
+  border-color: rgba(100, 70, 10, 0.45);
+  box-shadow:
+    0 1px 4px rgba(60, 30, 5, 0.3),
+    inset 0 1px 0 rgba(255, 245, 180, 0.15);
 }
 
 .btn-wiki-primary:hover {
-  background: #444;
+  background: linear-gradient(160deg, #8f6a18 0%, var(--gold-light) 100%);
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  box-shadow: 0 3px 12px rgba(60, 30, 5, 0.28);
 }
 
 .btn-wiki-ghost {
-  background: rgba(0,0,0,0.06);
-  color: #444;
+  background: rgba(176, 140, 42, 0.08);
+  color: var(--ink-muted);
+  border-color: var(--card-border);
 }
 
 .btn-wiki-ghost:hover {
-  background: rgba(0,0,0,0.12);
+  background: rgba(176, 140, 42, 0.16);
+  color: var(--ink);
 }
 
 .btn-wiki-danger {
-  background: rgba(220,38,38,0.1);
-  color: #dc2626;
+  background: rgba(180, 30, 30, 0.08);
+  color: #b91c1c;
+  border-color: rgba(180, 30, 30, 0.22);
 }
 
 .btn-wiki-danger:hover {
-  background: rgba(220,38,38,0.18);
+  background: rgba(180, 30, 30, 0.15);
 }
 
-/* ── Edit bar ───────────────────────────────────────────────── */
+/* ── Edit bar ─────────────────────────────────────────── */
 
 .wiki-edit-bar {
   display: flex;
@@ -156,69 +198,155 @@ nav {
   justify-content: flex-end;
   align-items: center;
   flex-wrap: wrap;
-  background: rgba(255,255,255,0.7);
+  background: rgba(237, 227, 200, 0.82);
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(0,0,0,0.08);
-  border-radius: 0.625rem;
+  border: 1px solid var(--card-border);
+  border-radius: 0.375rem;
   padding: 0.5rem 0.75rem;
-  margin-bottom: 1rem;
-  box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+  margin-bottom: 1.25rem;
+  box-shadow: 0 1px 4px var(--sepia);
 }
 
-/* ── Hero ───────────────────────────────────────────────────── */
+/* ── Hero ─────────────────────────────────────────────── */
 
 .wiki-hero {
   text-align: center;
-  padding: 3.5rem 1rem 3rem;
+  padding: 4rem 1rem 3rem;
   position: relative;
 }
 
 .wiki-hero-title {
   font-family: var(--font-heading);
-  font-size: clamp(3rem, 8vw, 5.5rem);
+  font-size: clamp(3rem, 9vw, 6rem);
   font-weight: 700;
-  letter-spacing: 0.25em;
-  color: #1a1714;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.12), 0 0 60px rgba(255,255,255,0.4);
+  letter-spacing: 0.32em;
+  color: var(--ink);
+  text-shadow:
+    0 1px 0 rgba(255, 248, 190, 0.8),
+    0 3px 10px rgba(80, 40, 8, 0.18);
   line-height: 1.1;
+}
+
+.wiki-hero-ornament {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  justify-content: center;
+  margin: 1rem 0 0.75rem;
+  color: var(--gold);
+}
+
+.wiki-hero-ornament::before,
+.wiki-hero-ornament::after {
+  content: '';
+  width: 5rem;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--gold));
+}
+
+.wiki-hero-ornament::after {
+  background: linear-gradient(to left, transparent, var(--gold));
 }
 
 .wiki-hero-sub {
   font-family: var(--font-body);
   font-size: 1.1rem;
-  color: rgba(26,23,20,0.65);
+  color: var(--ink-muted);
   font-style: italic;
-  margin-top: 0.75rem;
   letter-spacing: 0.04em;
 }
 
 .wiki-hero-rule {
-  width: 6rem;
-  height: 2px;
+  width: 8rem;
+  height: 1px;
   background: linear-gradient(to right, transparent, var(--gold), transparent);
-  margin: 1.25rem auto 0;
-  border-radius: 2px;
+  margin: 1.5rem auto 0;
 }
 
-/* ── Rich text content ──────────────────────────────────────── */
+/* ── Page header (listing pages) ─────────────────────── */
 
-.wiki-content p { text-align: justify; line-height: 1.75; color: #1a1714; margin-bottom: 0.75rem; }
-.wiki-content strong { font-weight: 700; }
-.wiki-content em { font-style: italic; }
-.wiki-content u { text-decoration: underline; }
-.wiki-content h2 { font-size: 1.4rem; font-weight: 700; margin: 1rem 0 0.5rem; font-family: var(--font-heading); text-align: left; }
-.wiki-content h3 { font-size: 1.15rem; font-weight: 600; margin: 0.75rem 0 0.4rem; font-family: var(--font-heading); text-align: left; text-decoration: none; }
-.wiki-content ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 0.75rem; }
-.wiki-content ol { list-style: decimal; padding-left: 1.5rem; margin-bottom: 0.75rem; }
-.wiki-content li { margin-bottom: 0.25rem; line-height: 1.65; }
-.wiki-content blockquote { border-left: 3px solid var(--gold); padding-left: 1rem; font-style: italic; color: #555; margin: 0.75rem 0; background: rgba(176,140,42,0.05); border-radius: 0 4px 4px 0; padding: 0.5rem 0.5rem 0.5rem 1rem; }
+.wiki-page-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+  padding-bottom: 1.5rem;
+  position: relative;
+}
 
-/* ── Tiptap editor ──────────────────────────────────────────── */
+.wiki-page-header::after {
+  content: '';
+  display: block;
+  width: 6rem;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--gold), transparent);
+  margin: 1rem auto 0;
+}
 
-.wiki-editor-content p { margin-bottom: 0.5rem; line-height: 1.65; color: #1a1714; }
-.wiki-editor-content ul { list-style: disc; padding-left: 1.25rem; margin-bottom: 0.5rem; }
-.wiki-editor-content ol { list-style: decimal; padding-left: 1.25rem; margin-bottom: 0.5rem; }
-.wiki-editor-content h2 { font-size: 1.3rem; font-weight: 700; margin: 0.75rem 0 0.3rem; font-family: var(--font-heading); text-align: left; }
-.wiki-editor-content h3 { font-size: 1.1rem; font-weight: 600; margin: 0.5rem 0 0.25rem; text-align: left; text-decoration: none; }
-.wiki-editor-content blockquote { border-left: 3px solid var(--gold); padding-left: 0.75rem; font-style: italic; color: #555; }
-.wiki-editor-content:focus { outline: none; }
+/* ── Rich text content ────────────────────────────────── */
+
+.wiki-content p            { text-align: justify; line-height: 1.85; color: var(--ink); margin-bottom: 0.9rem; }
+.wiki-content strong       { font-weight: 700; }
+.wiki-content em           { font-style: italic; }
+.wiki-content u            { text-decoration: underline; }
+.wiki-content h2           { font-size: 1.3rem; font-weight: 600; margin: 1.25rem 0 0.6rem; font-family: var(--font-heading); text-align: left; color: var(--ink); }
+.wiki-content h3           { font-size: 1.1rem; font-weight: 600; margin: 0.9rem 0 0.4rem; font-family: var(--font-heading); text-align: left; text-decoration: none; color: var(--ink-muted); }
+.wiki-content ul           { list-style: disc; padding-left: 1.6rem; margin-bottom: 0.9rem; }
+.wiki-content ol           { list-style: decimal; padding-left: 1.6rem; margin-bottom: 0.9rem; }
+.wiki-content li           { margin-bottom: 0.3rem; line-height: 1.75; }
+.wiki-content blockquote   {
+  border-left: 3px solid var(--gold);
+  padding: 0.6rem 0.75rem 0.6rem 1.1rem;
+  font-style: italic;
+  color: var(--ink-muted);
+  margin: 1rem 0;
+  background: var(--gold-faint);
+  border-radius: 0 4px 4px 0;
+}
+
+/* ── Tiptap editor ────────────────────────────────────── */
+
+.wiki-editor-content p            { margin-bottom: 0.5rem; line-height: 1.75; color: var(--ink); }
+.wiki-editor-content ul           { list-style: disc; padding-left: 1.25rem; margin-bottom: 0.5rem; }
+.wiki-editor-content ol           { list-style: decimal; padding-left: 1.25rem; margin-bottom: 0.5rem; }
+.wiki-editor-content h2           { font-size: 1.3rem; font-weight: 600; margin: 0.75rem 0 0.3rem; font-family: var(--font-heading); text-align: left; }
+.wiki-editor-content h3           { font-size: 1.1rem; font-weight: 600; margin: 0.5rem 0 0.25rem; text-align: left; text-decoration: none; }
+.wiki-editor-content blockquote   { border-left: 3px solid var(--gold); padding-left: 0.75rem; font-style: italic; color: var(--ink-muted); }
+.wiki-editor-content:focus        { outline: none; }
+
+/* ── Tiptap toolbar ───────────────────────────────────── */
+
+.wiki-editor-toolbar {
+  background: var(--parchment-dark);
+  border-bottom: 1px solid var(--card-border);
+  padding: 0.375rem 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.wiki-editor-toolbar button {
+  padding: 0.2rem 0.55rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 0.25rem;
+  transition: all 0.1s;
+  color: var(--ink-muted);
+  border: 1px solid transparent;
+}
+
+.wiki-editor-toolbar button:hover {
+  background: rgba(176, 140, 42, 0.14);
+  color: var(--ink);
+}
+
+.wiki-editor-toolbar button.active {
+  background: var(--gold);
+  color: #fdf8ee;
+  border-color: rgba(100, 70, 10, 0.3);
+}
+
+.wiki-editor-toolbar .sep {
+  width: 1px;
+  background: var(--card-border);
+  margin: 0 0.15rem;
+  align-self: stretch;
+}

@@ -40,7 +40,7 @@ export default function Navigation({ paysItems, racesItems, ryximusItems, isLogg
   ]
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 shadow-lg" style={{ background: 'linear-gradient(180deg, #5c5c5c 0%, #484848 100%)' }}>
+    <nav className="fixed top-0 left-0 right-0 z-50 shadow-lg" style={{ background: 'linear-gradient(180deg, #1c1008 0%, #2c1a08 100%)', borderBottom: '1px solid rgba(176,140,42,0.25)' }}>
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="text-white font-bold text-xl tracking-widest hover:text-gray-200 transition-colors" style={{ fontFamily: 'var(--font-heading)' }}>

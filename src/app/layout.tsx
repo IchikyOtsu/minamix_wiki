@@ -28,11 +28,12 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
           ryximusItems={ryximusItems.map((r) => ({ label: r.nom, href: `/ryximus/${r.slug}` }))}
           isLoggedIn={!!user}
         />
-        <main className="flex-1 mx-auto w-full max-w-5xl px-6 py-8">
+        <main className="flex-1 mx-auto w-full max-w-5xl px-6 py-10">
           {children}
         </main>
-        <footer className="bg-[#747474] text-white text-center text-sm py-4 mt-8">
-          <p>MINAMIX — Univers de fantasy</p>
+        <footer className="text-center text-sm py-6 mt-8" style={{ background: 'linear-gradient(180deg, #2c1a08 0%, #1c1008 100%)', borderTop: '1px solid rgba(176,140,42,0.25)' }}>
+          <p className="font-semibold tracking-widest text-xs mb-1" style={{ fontFamily: 'var(--font-heading)', color: 'var(--gold-light)', letterSpacing: '0.3em' }}>MINAMIX</p>
+          <p style={{ color: 'rgba(255,240,200,0.45)', fontSize: '0.72rem', letterSpacing: '0.12em' }}>Univers de fantasy</p>
         </footer>
       </body>
     </html>

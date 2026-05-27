@@ -25,8 +25,8 @@ export function WikiEditor({ content, onChange, className = '' }: WikiEditorProp
   if (!editor) return null
 
   return (
-    <div className={`border-2 border-blue-400 rounded-lg overflow-hidden ${className}`}>
-      <div className="bg-gray-100 border-b border-gray-300 p-1.5 flex flex-wrap gap-1">
+    <div className={`border border-[var(--card-border)] rounded-lg overflow-hidden shadow-sm ${className}`} style={{ borderColor: 'var(--gold)', borderWidth: '1.5px' }}>
+      <div className="wiki-editor-toolbar">
         <Btn onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive('bold')} title="Gras">
           <strong>G</strong>
         </Btn>
@@ -36,14 +36,14 @@ export function WikiEditor({ content, onChange, className = '' }: WikiEditorProp
         <Btn onClick={() => editor.chain().focus().toggleUnderline().run()} active={editor.isActive('underline')} title="Souligné">
           <u>S</u>
         </Btn>
-        <span className="w-px bg-gray-300 mx-0.5 self-stretch" />
+        <span className="sep" />
         <Btn onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} active={editor.isActive('heading', { level: 2 })} title="Titre 2">
           H2
         </Btn>
         <Btn onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} active={editor.isActive('heading', { level: 3 })} title="Titre 3">
           H3
         </Btn>
-        <span className="w-px bg-gray-300 mx-0.5 self-stretch" />
+        <span className="sep" />
         <Btn onClick={() => editor.chain().focus().toggleBulletList().run()} active={editor.isActive('bulletList')} title="Liste à puces">
           •
         </Btn>
@@ -54,7 +54,7 @@ export function WikiEditor({ content, onChange, className = '' }: WikiEditorProp
           ❝
         </Btn>
       </div>
-      <div className="bg-white p-3 min-h-[80px]">
+      <div className="p-3 min-h-[80px]" style={{ background: 'var(--card-bg)' }}>
         <EditorContent editor={editor} />
       </div>
     </div>
@@ -77,9 +77,7 @@ function Btn({
       type="button"
       onClick={onClick}
       title={title}
-      className={`px-2 py-0.5 text-sm rounded font-medium transition-colors ${
-        active ? 'bg-[#747474] text-white' : 'hover:bg-gray-200 text-gray-700'
-      }`}
+      className={active ? 'active' : ''}
     >
       {children}
     </button>

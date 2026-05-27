@@ -8,22 +8,31 @@ export default async function PaysPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-4xl font-bold" style={{ fontFamily: 'var(--font-heading)' }}>Les Pays de Minamix</h1>
-        {user && (
-          <Link href="/wiki/nouveau-pays" className="px-4 py-2 bg-[#747474] text-white rounded-lg text-sm hover:bg-[#5a5a5a] transition-colors">
-            + Nouveau pays
-          </Link>
-        )}
+      <div className="wiki-page-header">
+        <h1 className="text-4xl font-bold mb-2" style={{ fontFamily: 'var(--font-heading)', letterSpacing: '0.12em' }}>Les Pays</h1>
+        <p className="text-sm italic" style={{ color: 'var(--ink-muted)' }}>Les quatre nations qui façonnent le monde de Minamix</p>
       </div>
+
+      {user && (
+        <div className="flex justify-end mb-6">
+          <Link href="/wiki/nouveau-pays" className="btn-wiki btn-wiki-primary">+ Nouveau pays</Link>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {pays.map((p) => (
-          <Link key={p.slug} href={`/pays/${p.slug}`} className="rounded-lg p-6 text-white shadow hover:opacity-90 hover:scale-[1.02] transition-all duration-200" style={{ backgroundColor: p.couleur }}>
-            <h2 className="text-2xl font-bold mb-3" style={{ fontFamily: 'var(--font-heading)' }}>{p.nom}</h2>
-            <p className="text-sm opacity-90 leading-relaxed">
+          <Link
+            key={p.slug}
+            href={`/pays/${p.slug}`}
+            className="rounded-lg p-7 text-white shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-200"
+            style={{ backgroundColor: p.couleur, border: '1px solid rgba(0,0,0,0.12)' }}
+          >
+            <h2 className="text-2xl font-bold mb-3 text-left" style={{ fontFamily: 'var(--font-heading)', letterSpacing: '0.08em' }}>{p.nom}</h2>
+            <p className="text-sm leading-relaxed opacity-90" style={{ fontStyle: 'italic' }}>
               {typeof p.geographie === 'string' && !p.geographie.includes('<')
-                ? p.geographie
-                : p.geographie?.replace(/<[^>]+>/g, '').substring(0, 200)}
+                ? p.geographie.substring(0, 180)
+                : p.geographie?.replace(/<[^>]+>/g, '').substring(0, 180)}
+              {(p.geographie?.length ?? 0) > 180 ? '…' : ''}
             </p>
           </Link>
         ))}

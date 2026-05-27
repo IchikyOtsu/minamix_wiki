@@ -8,24 +8,33 @@ export default async function RyximusPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-4xl font-bold" style={{ fontFamily: 'var(--font-heading)' }}>Les Ryximus</h1>
-        {user && (
-          <Link href="/wiki/nouveau-ryximus" className="px-4 py-2 bg-[#747474] text-white rounded-lg text-sm hover:bg-[#5a5a5a] transition-colors">
-            + Nouveau Ryximus
-          </Link>
-        )}
+      <div className="wiki-page-header">
+        <h1 className="text-4xl font-bold mb-2" style={{ fontFamily: 'var(--font-heading)', letterSpacing: '0.12em' }}>Les Ryximus</h1>
+        <p className="text-sm italic" style={{ color: 'var(--ink-muted)' }}>Les huit entités divines qui façonnent le destin des mortels</p>
       </div>
-      <p className="text-center text-gray-700 mb-10 italic">Les huit entités divines qui façonnent le destin du monde de Minamix</p>
+
+      {user && (
+        <div className="flex justify-end mb-6">
+          <Link href="/wiki/nouveau-ryximus" className="btn-wiki btn-wiki-primary">+ Nouveau Ryximus</Link>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {ryximus.map((r) => (
-          <Link key={r.slug} href={`/ryximus/${r.slug}`} className="rounded-lg p-6 text-white shadow hover:opacity-90 hover:scale-[1.02] transition-all duration-200" style={{ backgroundColor: r.couleur }}>
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-2xl font-bold" style={{ fontFamily: 'var(--font-heading)' }}>{r.nom}</h2>
-              <span className="text-sm opacity-80 bg-white bg-opacity-20 rounded-full px-3 py-1">{r.element}</span>
+          <Link
+            key={r.slug}
+            href={`/ryximus/${r.slug}`}
+            className="rounded-lg p-7 text-white shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-200"
+            style={{ backgroundColor: r.couleur, border: '1px solid rgba(0,0,0,0.15)' }}
+          >
+            <div className="flex items-start justify-between gap-3 mb-3">
+              <h2 className="text-2xl font-bold text-left" style={{ fontFamily: 'var(--font-heading)' }}>{r.nom}</h2>
+              <span className="shrink-0 text-xs bg-white/20 border border-white/30 rounded-full px-3 py-1 mt-1">
+                {r.element}
+              </span>
             </div>
             <p className="text-sm opacity-90 italic leading-relaxed">&ldquo;{r.citation}&rdquo;</p>
-            <p className="text-xs opacity-70 mt-2">{r.genre}</p>
+            <p className="text-xs opacity-55 mt-3" style={{ fontFamily: 'var(--font-heading)', letterSpacing: '0.06em' }}>{r.genre}</p>
           </Link>
         ))}
       </div>
