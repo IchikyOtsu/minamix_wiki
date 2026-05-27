@@ -104,7 +104,7 @@ export function RaceDetailClient({ race: initial, allRaces, isLoggedIn }: Props)
               </div>
             ) : (
               <>
-                <div className="font-semibold text-lg">{draft.population.toLocaleString()}</div>
+                <div className="font-semibold text-lg">{draft.population.toLocaleString('fr-FR')}</div>
                 <div className="text-gray-700">habitants</div>
                 <div className="mt-1 text-gray-700">Espérance de vie : {draft.esperanceVie}</div>
               </>

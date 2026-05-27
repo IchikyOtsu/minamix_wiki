@@ -30,7 +30,7 @@ export default async function RacesPage() {
             <div className="flex justify-between items-start mb-3 gap-3">
               <h2 className="text-xl font-bold text-left" style={{ fontFamily: 'var(--font-heading)' }}>{r.nom}</h2>
               <span className="shrink-0 text-xs bg-white/60 rounded-full px-3 py-1 font-medium" style={{ fontFamily: 'var(--font-heading)', fontSize: '0.7rem' }}>
-                {r.population.toLocaleString()} hab.
+                {r.population.toLocaleString('fr-FR')} hab.
               </span>
             </div>
             <p className="text-sm leading-relaxed opacity-85" style={{ fontStyle: 'italic' }}>

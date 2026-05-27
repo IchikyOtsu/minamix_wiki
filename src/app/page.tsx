@@ -70,7 +70,7 @@ export default async function Home() {
               style={{ backgroundColor: r.couleur, border: '1px solid rgba(0,0,0,0.10)' }}
             >
               <div className="font-semibold text-sm" style={{ fontFamily: 'var(--font-heading)' }}>{r.nom}</div>
-              <div className="text-xs mt-1.5 opacity-70">{r.population.toLocaleString()} hab.</div>
+              <div className="text-xs mt-1.5 opacity-70">{r.population.toLocaleString('fr-FR')} hab.</div>
             </Link>
           ))}
         </div>
