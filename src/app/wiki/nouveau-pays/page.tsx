@@ -10,8 +10,6 @@ function toSlug(s: string) {
   return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 }
 
-const emptyTradition = { nom: '', description: '' }
-
 export default function NouveauPaysPage() {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
@@ -23,7 +21,7 @@ export default function NouveauPaysPage() {
   const [politiqueExterne, setPolitiqueExterne] = useState('')
   const [modeDeVie, setModeDeVie] = useState('')
   const [magie, setMagie] = useState('')
-  const [traditions, setTraditions] = useState([emptyTradition])
+  const [traditions, setTraditions] = useState('')
   const [societe, setSociete] = useState('')
 
   async function handleSubmit(e: React.FormEvent) {
@@ -82,18 +80,7 @@ export default function NouveauPaysPage() {
         {/* Traditions */}
         <div className="bg-white rounded-xl shadow p-6">
           <label className="block text-sm font-semibold mb-3">Traditions</label>
-          <div className="space-y-3">
-            {traditions.map((t, i) => (
-              <div key={i} className="flex gap-2 items-start border rounded p-2">
-                <div className="flex-1 space-y-1">
-                  <input value={t.nom} onChange={(e) => setTraditions((tr) => { const arr = [...tr]; arr[i] = { ...arr[i], nom: e.target.value }; return arr })} className="w-full border rounded px-2 py-1 text-sm font-semibold" placeholder="Nom" />
-                  <input value={t.description} onChange={(e) => setTraditions((tr) => { const arr = [...tr]; arr[i] = { ...arr[i], description: e.target.value }; return arr })} className="w-full border rounded px-2 py-1 text-sm" placeholder="Description" />
-                </div>
-                <button type="button" onClick={() => setTraditions((tr) => tr.filter((_, j) => j !== i))} className="text-red-500 hover:text-red-700 text-lg px-1">×</button>
-              </div>
-            ))}
-            <button type="button" onClick={() => setTraditions((tr) => [...tr, emptyTradition])} className="text-sm text-blue-600 hover:underline">+ Ajouter</button>
-          </div>
+          <WikiEditor content={traditions} onChange={setTraditions} />
         </div>
 
         <div className="flex gap-3 justify-end">
