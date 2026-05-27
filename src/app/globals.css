@@ -1,26 +1,224 @@
+@import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap");
+
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --font-heading: "Cinzel", serif;
+  --font-body: "Crimson Text", "Verdana", sans-serif;
+  --bg-silver: #b8b8b8;
+  --nav-gray: #5a5a5a;
+  --gold: #b08c2a;
+  --card-bg: #fefefe;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* ── Base ───────────────────────────────────────────────────── */
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--bg-silver);
+  background-image:
+    radial-gradient(ellipse at 20% 0%, rgba(255,255,255,0.18) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 100%, rgba(0,0,0,0.08) 0%, transparent 55%);
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  color: #1a1714;
+  margin-top: 64px;
+  min-height: 100vh;
 }
+
+h1, h2, h3, h4 {
+  font-family: var(--font-heading);
+  text-align: center;
+}
+
+h3 {
+  text-decoration: underline;
+}
+
+a:visited {
+  color: #7b2d8b;
+}
+
+/* ── Cards ──────────────────────────────────────────────────── */
+
+.wiki-card {
+  background: var(--card-bg);
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.08);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.wiki-card:hover {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1), 0 8px 28px rgba(0,0,0,0.12);
+}
+
+/* ── Section titles ─────────────────────────────────────────── */
+
+.wiki-section-title {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #1a1714;
+  text-align: left;
+  position: relative;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.wiki-section-title::after {
+  content: '';
+  display: block;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 3rem;
+  height: 2px;
+  background: var(--gold);
+  border-radius: 2px;
+}
+
+/* ── Decorative divider ─────────────────────────────────────── */
+
+.wiki-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 2rem 0;
+  color: rgba(26,23,20,0.3);
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  letter-spacing: 0.2em;
+}
+
+.wiki-divider::before,
+.wiki-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(26,23,20,0.25), transparent);
+}
+
+/* ── Navigation ─────────────────────────────────────────────── */
+
+nav {
+  backdrop-filter: blur(4px);
+}
+
+/* ── Buttons ────────────────────────────────────────────────── */
+
+.btn-wiki {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.4rem 0.875rem;
+  border-radius: 0.375rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.btn-wiki-primary {
+  background: var(--nav-gray);
+  color: white;
+}
+
+.btn-wiki-primary:hover {
+  background: #444;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.btn-wiki-ghost {
+  background: rgba(0,0,0,0.06);
+  color: #444;
+}
+
+.btn-wiki-ghost:hover {
+  background: rgba(0,0,0,0.12);
+}
+
+.btn-wiki-danger {
+  background: rgba(220,38,38,0.1);
+  color: #dc2626;
+}
+
+.btn-wiki-danger:hover {
+  background: rgba(220,38,38,0.18);
+}
+
+/* ── Edit bar ───────────────────────────────────────────────── */
+
+.wiki-edit-bar {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 0.625rem;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+}
+
+/* ── Hero ───────────────────────────────────────────────────── */
+
+.wiki-hero {
+  text-align: center;
+  padding: 3.5rem 1rem 3rem;
+  position: relative;
+}
+
+.wiki-hero-title {
+  font-family: var(--font-heading);
+  font-size: clamp(3rem, 8vw, 5.5rem);
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  color: #1a1714;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.12), 0 0 60px rgba(255,255,255,0.4);
+  line-height: 1.1;
+}
+
+.wiki-hero-sub {
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  color: rgba(26,23,20,0.65);
+  font-style: italic;
+  margin-top: 0.75rem;
+  letter-spacing: 0.04em;
+}
+
+.wiki-hero-rule {
+  width: 6rem;
+  height: 2px;
+  background: linear-gradient(to right, transparent, var(--gold), transparent);
+  margin: 1.25rem auto 0;
+  border-radius: 2px;
+}
+
+/* ── Rich text content ──────────────────────────────────────── */
+
+.wiki-content p { text-align: justify; line-height: 1.75; color: #1a1714; margin-bottom: 0.75rem; }
+.wiki-content strong { font-weight: 700; }
+.wiki-content em { font-style: italic; }
+.wiki-content u { text-decoration: underline; }
+.wiki-content h2 { font-size: 1.4rem; font-weight: 700; margin: 1rem 0 0.5rem; font-family: var(--font-heading); text-align: left; }
+.wiki-content h3 { font-size: 1.15rem; font-weight: 600; margin: 0.75rem 0 0.4rem; font-family: var(--font-heading); text-align: left; text-decoration: none; }
+.wiki-content ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 0.75rem; }
+.wiki-content ol { list-style: decimal; padding-left: 1.5rem; margin-bottom: 0.75rem; }
+.wiki-content li { margin-bottom: 0.25rem; line-height: 1.65; }
+.wiki-content blockquote { border-left: 3px solid var(--gold); padding-left: 1rem; font-style: italic; color: #555; margin: 0.75rem 0; background: rgba(176,140,42,0.05); border-radius: 0 4px 4px 0; padding: 0.5rem 0.5rem 0.5rem 1rem; }
+
+/* ── Tiptap editor ──────────────────────────────────────────── */
+
+.wiki-editor-content p { margin-bottom: 0.5rem; line-height: 1.65; color: #1a1714; }
+.wiki-editor-content ul { list-style: disc; padding-left: 1.25rem; margin-bottom: 0.5rem; }
+.wiki-editor-content ol { list-style: decimal; padding-left: 1.25rem; margin-bottom: 0.5rem; }
+.wiki-editor-content h2 { font-size: 1.3rem; font-weight: 700; margin: 0.75rem 0 0.3rem; font-family: var(--font-heading); text-align: left; }
+.wiki-editor-content h3 { font-size: 1.1rem; font-weight: 600; margin: 0.5rem 0 0.25rem; text-align: left; text-decoration: none; }
+.wiki-editor-content blockquote { border-left: 3px solid var(--gold); padding-left: 0.75rem; font-style: italic; color: #555; }
+.wiki-editor-content:focus { outline: none; }

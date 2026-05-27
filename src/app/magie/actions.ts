@@ -1,0 +1,22 @@
+'use server'
+
+import { createClient } from '@/lib/supabase/server'
+import { revalidatePath } from 'next/cache'
+
+type MagieSection = { titre: string; contenu: string }
+type MagieAffinite = { element: string; description: string }
+type MagieFields = { intro: string; sections: MagieSection[]; affinites: MagieAffinite[] }
+
+export async function upsertMagie(fields: MagieFields) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Non autorisé')
+
+  const { error } = await supabase
+    .from('magie')
+    .upsert({ id: 1, data: fields, updated_at: new Date().toISOString() })
+
+  if (error) throw new Error(error.message)
+
+  revalidatePath('/magie')
+}
