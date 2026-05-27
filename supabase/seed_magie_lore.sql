@@ -1,0 +1,54 @@
+-- Lore complet de la magie — texte officiel
+-- À exécuter dans Supabase → SQL Editor
+
+INSERT INTO magie (id, data) VALUES (1, jsonb_build_object(
+
+  'intro', $$La magie ne sort pas de nulle part et est régie par des règles précises.$$,
+
+  'sections', jsonb_build_array(
+
+    jsonb_build_object(
+      'titre', $$Qu'est-ce que la magie ?$$,
+      'contenu', $$<p>La première question à se poser est d'où elle provient. Dans l'air, entre deux molécules d'O<sub>2</sub>, se baladent des particules de mana. Invisible à l'œil nu puisqu'elles sont fines et incolores, il est possible de les révéler avec divers sorts. Chaque personne capable de pratiquer la magie possède un réservoir non physique de mana. La capacité de ce réservoir varie selon les personnes. Plus le réservoir est grand, plus la personne peut lancer de sorts. Chaque sort déduit une certaine quantité de mana du réservoir. Lorsque ce dernier est vide au-delà d'un certain seuil, la personne perd connaissance jusqu'à retrouver un niveau correct, bien que toujours faible. Lorsqu'un mage voit son réservoir diminuer, il absorbe les particules environnantes jusqu'à ce que son réservoir soit de nouveau plein. Ce phénomène se fait de manière passive, mais la méditation permet d'accélérer le processus de manière consciente. Notons que la capacité de stockage du réservoir augmente avec la croissance (et s'arrête donc naturellement de croître à l'âge adulte), mais également avec de l'entraînement.</p><p>Le mana ne sort pas de nulle part ; de nombreuses créatures du bestiaire en produisent naturellement en expirant, et il semblerait que les végétaux en rejettent lors de la photosynthèse. Enfin, tout sort perd une partie de son mana dans l'air ambiant, bien que ce soit très faible.</p><p>Chaque sort est relié à un ou plusieurs éléments. Le sort <em>Ignis</em> dépend de l'élément du feu. Pourtant, si on prend l'exemple de <em>Spatha ignis</em>, ce dernier est une combinaison de l'élément du feu, pour la création et la mise en forme de la flamme, et de l'élément de l'air, pour la mise en mouvement.</p>$$
+    ),
+
+    jsonb_build_object(
+      'titre', 'Consommation',
+      'contenu', $$<p>La consommation en mana des sorts est très variable. Par exemple, le sort <em>Lux</em>, qui fait jaillir de la lumière d'un point précis, consommera du mana en continu tant que le sort sera actif. En revanche, le sort <em>Ignis</em> ne consommera qu'une quantité fixe de mana à la création de la flamme.</p><p>Certains sorts de très haut niveau peuvent nécessiter d'autres carburants que le mana seul, autant sous la forme de cercle magique que de sort. On parle parfois dans les légendes de mages ayant perdu l'esprit en essayant d'invoquer une créature d'un autre monde, de personnes ayant perdu un membre ou deux en échange d'une puissance de feu inégalée.</p>$$
+    ),
+
+    jsonb_build_object(
+      'titre', 'Sorts',
+      'contenu', $$<p>Les sorts sont divisés en deux catégories : les sorts communs, et les sorts avancés.</p><p>Les sorts communs sont les plus basiques. Il suffit de penser le nom du sort, ou de le prononcer pour qu'il prenne effet. Par exemple, pour allumer un feu, il suffira de faire appel au sort <em>Ignis</em> en pointant vers un tas de bois. Ce dernier s'embrasera sans demander son reste. Un autre exemple, le sort <em>Cerca</em>, qui sert à retrouver un objet perdu en y pensant, permettra de créer un léger trait lumineux jusqu'à l'objet en question.</p><p>Peu gourmands en mana, ce sont des sorts qui n'ont pas besoin d'instructions précises. La simple activation dudit sort est la seule instruction nécessaire. Les êtres manipulant particulièrement bien le mana peuvent, dès leur plus jeune âge, lancer les sorts communs sans les nommer. En effet, le fait de nommer un sort pour le lancer renforce son pouvoir, et permet de concentrer l'esprit de la personne sur l'activation du sort, sans autre distraction. Adulte, toute personne ayant une réserve de mana un tant soit peu significative peut lancer les sorts du commun sans incantation.</p><p>Les sorts avancés, quant à eux, sont plus complexes. On parle ici de sorts qui demandent plus d'instructions, ou qui combinent plusieurs actions. Par exemple, lancer le sort <em>Spatha ignis</em> requiert la création d'une flamme ainsi que sa mise en forme, puis l'instruction de la direction dans laquelle la lancer, ainsi que sa vitesse. Bien que ces deux derniers points ne soient pas précisés à haute voix par le mage, il faut tout de même y penser. Un autre exemple, le sort <em>Furtum</em> ne fait qu'alléger grandement le corps, pouvant aller jusqu'à faire flotter la personne de quelques centimètres de haut. Sans plus d'instructions, le sort serait de l'ordre du commun, mais en pensant à une direction quelconque (vers le haut ou la droite) ainsi qu'une vitesse de mouvement, ce dernier devient un sort complexe. Il est possible, grâce à ce sort, de se mouvoir dans les airs, plus ou moins haut, et plus ou moins vite. Plus les sorts sont complexes, plus ils sont gourmands en énergie, et plus l'incantation est longue. Les sorts les plus puissants sont aussi longs que certains poèmes, de véritables odes envers les Ryximus.</p>$$
+    ),
+
+    jsonb_build_object(
+      'titre', 'Cercles magiques',
+      'contenu', $$<p>Prenant de manière générale plus de temps à se mettre en place et à se lancer que les sorts, les cercles magiques sont néanmoins redoutables. En effet, ils font d'office appel à des magies avancées, et ce n'est donc pas à la portée de tous que d'apprendre à les maîtriser.</p><p>Le cercle magique est constitué tout d'abord d'un cercle. Autour de ce dernier, le mage commence à écrire les runes nécessaires. Ce sont les paramètres de la magie. On y note le ou les éléments nécessités, la direction, la vitesse, la puissance, si le sort se lance sous certaines conditions ou à retardement, etc… Plus la magie est complexe, plus nombreuses sont les runes, et plus coûteuse sera la magie. Il est possible d'ajouter des ingrédients alchimiques ou des objets magiques pour augmenter la puissance du sort, sa portée ou réduire la consommation du mana du mage. Le cercle magique consomme non seulement une partie du mana du mage, mais également le mana ambiant. Encore une fois, plus le cercle est complexe, plus le sort est puissant et/ou précis, et plus il sera manavore.</p><p>Il est à noter que les cercles magiques tiennent de leur origine le langage des dieux eux-mêmes, d'où la puissance qu'elles renferment. De façon générale, il est admis que les runes auraient servi de ponts pour communiquer entre les dieux et les hommes.</p>$$
+    ),
+
+    jsonb_build_object(
+      'titre', 'Magie sauvage',
+      'contenu', $$<p>Si les sorts prononcés et les cercles magiques sont la norme à Silfus et Frimaz, les choses sont bien différentes à Ilonaï. En effet, la magie là-bas y est pratiquée de manière intuitive. L'activation de la magie passe uniquement par volonté pure, sans incantations, ce qui laisse une plus grande liberté dans la création et la mise en pratique de la magie. Par exemple, le sort <em>Spatha ignis</em> aura plus de liberté de mouvement ou de changement de forme sous forme de « magie sauvage » que de sort.</p><p>Plus proches de la nature, la magie sauvage est plus puissante, mais demande une plus grande concentration, ce qui peut être un challenge en situation stressante ou de combat.</p>$$
+    ),
+
+    jsonb_build_object(
+      'titre', 'Affinités et apprentissage',
+      'contenu', $$<p>Lorsqu'une personne naît, sa capacité à maîtriser ou non la magie est déjà fixée, par l'existence ou l'absence de réservoir de mana. Cependant, il est possible de n'apprendre que tardivement que l'on peut faire de la magie, tandis que certains le peuvent depuis leur plus jeune âge.</p><p>En plus de ce réservoir, toute personne capable de pratiquer la magie possède une affinité envers un élément. Dans de très rares cas, de grands prodiges peuvent avoir deux affinités, mais on parle de quelque chose qui n'arrive qu'une fois sur 30 000 naissances.</p><p>Une affinité fait que la personne aura de plus grandes facilités pour apprendre et maîtriser la magie de cet élément en particulier. Par la même occasion, la magie reliée à leur affinité a tendance à être significativement plus puissante.</p><p>À Silfus et Frimaz, il est impensable d'apprendre la magie en autodidacte. Bien que ce ne soit pas impossible sur le papier, dans les faits, la tâche est plus ardue. Avant de pouvoir lancer son premier sort, il faut en effet savoir se concentrer sur le flux de mana qui sort du corps, garder sa concentration en toutes circonstances ou encore faire naître sa volonté. Ce sont autant de choses qui mettent du temps à s'apprendre sans instructions claires. Enfin, les personnes qui ne passent pas par les écoles de magie pour la maîtriser sont mal vues, car ne contribuent pas à la société, et se contentent d'assouvir leurs plaisirs personnels.</p><p>À Lyndera, en revanche, cela diffère. Autant certains habitants s'en vont apprendre la magie dans des académies spécialisées à l'étranger, autant d'autres utilisent la magie sauvage à un niveau assez rudimentaire. Enfin, il faut noter que la partie bestiale des hommes-bêtes peut réduire leur capacité de concentration, ce qui les rend plus difficiles à devenir de bons mages, en dépit de tous leurs efforts.</p>$$
+    )
+
+  ),
+
+  'affinites', jsonb_build_array(
+    jsonb_build_object('element', 'Feu',       'description', ''),
+    jsonb_build_object('element', 'Eau',       'description', ''),
+    jsonb_build_object('element', 'Terre',     'description', ''),
+    jsonb_build_object('element', 'Air',       'description', ''),
+    jsonb_build_object('element', 'Nature',    'description', ''),
+    jsonb_build_object('element', 'Lumière',   'description', ''),
+    jsonb_build_object('element', 'Obscurité', 'description', ''),
+    jsonb_build_object('element', 'Esprit',    'description', '')
+  )
+
+))
+ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data;
