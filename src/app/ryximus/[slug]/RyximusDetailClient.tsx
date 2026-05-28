@@ -23,7 +23,7 @@ export function RyximusDetailClient({ ryximus: initial, allRyximus, isLoggedIn, 
   const [saving, setSaving] = useState(false)
   const [conflict, setConflict] = useState(false)
   const [draft, setDraft] = useState<Ryximus>(initial)
-  const [loadedAt] = useState(updatedAt)
+  const [loadedAt, setLoadedAt] = useState(updatedAt)
   const router = useRouter()
 
   async function handleSave() {
@@ -32,6 +32,7 @@ export function RyximusDetailClient({ ryximus: initial, allRyximus, isLoggedIn, 
     const { slug, ...fields } = draft
     const result = await upsertRyximus(slug, fields, loadedAt)
     if (result.ok) {
+      setLoadedAt(result.updatedAt)
       setEditing(false)
       router.refresh()
     } else if (result.conflict) {
@@ -47,6 +48,7 @@ export function RyximusDetailClient({ ryximus: initial, allRyximus, isLoggedIn, 
     const { slug, ...fields } = draft
     const result = await upsertRyximus(slug, fields, null)
     if (result.ok) {
+      setLoadedAt(result.updatedAt)
       setConflict(false)
       setEditing(false)
       router.refresh()

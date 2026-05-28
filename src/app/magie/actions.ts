@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache'
 type MagieSection = { titre: string; contenu: string }
 type MagieAffinite = { element: string; description: string }
 type MagieFields = { intro: string; sections: MagieSection[]; affinites: MagieAffinite[] }
-type SaveResult = { ok: true } | { ok: false; conflict: boolean; error?: string }
+type SaveResult = { ok: true; updatedAt: string } | { ok: false; conflict: boolean; error?: string }
 
 export async function upsertMagie(fields: MagieFields, loadedAt: string | null = null): Promise<SaveResult> {
   const supabase = await createClient()
@@ -20,12 +20,13 @@ export async function upsertMagie(fields: MagieFields, loadedAt: string | null =
     }
   }
 
+  const updatedAt = new Date().toISOString()
   const { error } = await supabase
     .from('magie')
-    .upsert({ id: 1, data: fields, updated_at: new Date().toISOString() })
+    .upsert({ id: 1, data: fields, updated_at: updatedAt })
 
   if (error) return { ok: false, conflict: false, error: error.message }
 
   revalidatePath('/magie')
-  return { ok: true }
+  return { ok: true, updatedAt }
 }

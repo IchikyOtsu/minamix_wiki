@@ -24,8 +24,7 @@ export function AnnexesClient({ annexes: initial, isLoggedIn }: Props) {
   const [drafts, setDrafts] = useState<Record<string, AnnexeWithTs>>(
     Object.fromEntries(initial.map((a) => [a.label, a]))
   )
-  // Snapshot of updatedAt per annexe at page load — used for conflict detection
-  const [loadedAts] = useState<Record<string, string | null>>(
+  const [loadedAts, setLoadedAts] = useState<Record<string, string | null>>(
     Object.fromEntries(initial.map((a) => [a.label, a.updatedAt]))
   )
   const [saving, setSaving] = useState(false)
@@ -45,6 +44,7 @@ export function AnnexesClient({ annexes: initial, isLoggedIn }: Props) {
     const a = getAnnexe(label)
     const result = await upsertAnnexe(label, a.titre, a.contenu, loadedAts[label] ?? null)
     if (result.ok) {
+      setLoadedAts((l) => ({ ...l, [label]: result.updatedAt }))
       setEditingLabel(null)
       router.refresh()
     } else if (result.conflict) {
@@ -60,6 +60,7 @@ export function AnnexesClient({ annexes: initial, isLoggedIn }: Props) {
     const a = getAnnexe(label)
     const result = await upsertAnnexe(label, a.titre, a.contenu, null)
     if (result.ok) {
+      setLoadedAts((l) => ({ ...l, [label]: result.updatedAt }))
       setConflicts((c) => ({ ...c, [label]: false }))
       setEditingLabel(null)
       router.refresh()

@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import type { Pays } from '@/data/pays'
 
-type SaveResult = { ok: true } | { ok: false; conflict: boolean; error?: string }
+type SaveResult = { ok: true; updatedAt: string } | { ok: false; conflict: boolean; error?: string }
 
 export async function upsertPays(slug: string, fields: Omit<Pays, 'slug'>, loadedAt: string | null = null): Promise<SaveResult> {
   const supabase = await createClient()
@@ -18,16 +18,17 @@ export async function upsertPays(slug: string, fields: Omit<Pays, 'slug'>, loade
     }
   }
 
+  const updatedAt = new Date().toISOString()
   const { error } = await supabase
     .from('pays')
-    .upsert({ slug, data: fields, updated_at: new Date().toISOString() })
+    .upsert({ slug, data: fields, updated_at: updatedAt })
 
   if (error) return { ok: false, conflict: false, error: error.message }
 
   revalidatePath(`/pays/${slug}`)
   revalidatePath('/pays')
   revalidatePath('/')
-  return { ok: true }
+  return { ok: true, updatedAt }
 }
 
 export async function deletePays(slug: string) {

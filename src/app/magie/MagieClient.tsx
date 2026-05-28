@@ -22,7 +22,7 @@ export function MagieClient({ data: initial, isLoggedIn, updatedAt }: Props) {
   const [saving, setSaving] = useState(false)
   const [conflict, setConflict] = useState(false)
   const [draft, setDraft] = useState<MagieData>(initial)
-  const [loadedAt] = useState(updatedAt)
+  const [loadedAt, setLoadedAt] = useState(updatedAt)
   const router = useRouter()
 
   async function handleSave() {
@@ -30,6 +30,7 @@ export function MagieClient({ data: initial, isLoggedIn, updatedAt }: Props) {
     setConflict(false)
     const result = await upsertMagie(draft, loadedAt)
     if (result.ok) {
+      setLoadedAt(result.updatedAt)
       setEditing(false)
       router.refresh()
     } else if (result.conflict) {
@@ -44,6 +45,7 @@ export function MagieClient({ data: initial, isLoggedIn, updatedAt }: Props) {
     setSaving(true)
     const result = await upsertMagie(draft, null)
     if (result.ok) {
+      setLoadedAt(result.updatedAt)
       setConflict(false)
       setEditing(false)
       router.refresh()

@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
-type SaveResult = { ok: true } | { ok: false; conflict: boolean; error?: string }
+type SaveResult = { ok: true; updatedAt: string } | { ok: false; conflict: boolean; error?: string }
 
 export async function upsertAnnexe(label: string, titre: string, contenu: string, loadedAt: string | null = null): Promise<SaveResult> {
   const supabase = await createClient()
@@ -17,14 +17,15 @@ export async function upsertAnnexe(label: string, titre: string, contenu: string
     }
   }
 
+  const updatedAt = new Date().toISOString()
   const { error } = await supabase
     .from('annexes')
-    .upsert({ label, data: { titre, contenu }, updated_at: new Date().toISOString() })
+    .upsert({ label, data: { titre, contenu }, updated_at: updatedAt })
 
   if (error) return { ok: false, conflict: false, error: error.message }
 
   revalidatePath('/annexes')
-  return { ok: true }
+  return { ok: true, updatedAt }
 }
 
 export async function deleteAnnexe(label: string) {

@@ -22,7 +22,7 @@ export function RaceDetailClient({ race: initial, allRaces, isLoggedIn, updatedA
   const [saving, setSaving] = useState(false)
   const [conflict, setConflict] = useState(false)
   const [draft, setDraft] = useState<Race>(initial)
-  const [loadedAt] = useState(updatedAt)
+  const [loadedAt, setLoadedAt] = useState(updatedAt)
   const router = useRouter()
 
   async function handleSave() {
@@ -31,6 +31,7 @@ export function RaceDetailClient({ race: initial, allRaces, isLoggedIn, updatedA
     const { slug, ...fields } = draft
     const result = await upsertRace(slug, fields, loadedAt)
     if (result.ok) {
+      setLoadedAt(result.updatedAt)
       setEditing(false)
       router.refresh()
     } else if (result.conflict) {
@@ -46,6 +47,7 @@ export function RaceDetailClient({ race: initial, allRaces, isLoggedIn, updatedA
     const { slug, ...fields } = draft
     const result = await upsertRace(slug, fields, null)
     if (result.ok) {
+      setLoadedAt(result.updatedAt)
       setConflict(false)
       setEditing(false)
       router.refresh()
