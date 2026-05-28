@@ -3,8 +3,9 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { WikiEditor } from '@/components/WikiEditor'
+import { BlockEditor } from '@/components/BlockEditor'
 import { upsertRace } from '@/app/races/[slug]/actions'
+import type { Block } from '@/types/blocks'
 
 function toSlug(s: string) {
   return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
@@ -17,11 +18,7 @@ export default function NouvelleRacePage() {
   const [couleur, setCouleur] = useState('#747474')
   const [population, setPopulation] = useState(0)
   const [esperanceVie, setEsperanceVie] = useState('')
-  const [description, setDescription] = useState('')
-  const [histoire, setHistoire] = useState('')
-  const [physique, setPhysique] = useState('')
-  const [magie, setMagie] = useState('')
-  const [societe, setSociete] = useState('')
+  const [blocks, setBlocks] = useState<Block[]>([])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -29,7 +26,7 @@ export default function NouvelleRacePage() {
     setSaving(true)
     const slug = toSlug(nom)
     try {
-      await upsertRace(slug, { nom, couleur, image: '', population, esperanceVie, description, histoire, physique, magie, societe })
+      await upsertRace(slug, { nom, couleur, image: '', population, esperanceVie, blocks })
       router.push(`/races/${slug}`)
       router.refresh()
     } catch {
@@ -70,18 +67,7 @@ export default function NouvelleRacePage() {
           </div>
         </div>
 
-        {[
-          ['Description', description, setDescription],
-          ['Histoire', histoire, setHistoire],
-          ['Apparence physique', physique, setPhysique],
-          ['Magie', magie, setMagie],
-          ['Société', societe, setSociete],
-        ].map(([label, value, setter]) => (
-          <div key={label as string} className="bg-white rounded-xl shadow p-6">
-            <label className="block text-sm font-semibold mb-2">{label as string}</label>
-            <WikiEditor content={value as string} onChange={setter as (v: string) => void} />
-          </div>
-        ))}
+        <BlockEditor blocks={blocks} onChange={setBlocks} />
 
         <div className="flex gap-3 justify-end">
           <Link href="/races" className="px-5 py-2 bg-gray-200 rounded-lg text-sm hover:bg-gray-300 transition-colors">Annuler</Link>

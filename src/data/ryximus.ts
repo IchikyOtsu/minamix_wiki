@@ -1,3 +1,5 @@
+import type { Block } from '@/types/blocks'
+
 export interface Ryximus {
   slug: string;
   nom: string;
@@ -7,6 +9,7 @@ export interface Ryximus {
   image: string;
   personnalite: string;
   conditionPacte: string;
+  blocks?: Block[];
 }
 
 export const ryximus: Ryximus[] = [

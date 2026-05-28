@@ -33,10 +33,8 @@ export default async function RacesPage() {
               </span>
             </div>
             <p className="text-sm leading-relaxed opacity-85" style={{ fontStyle: 'italic' }}>
-              {typeof r.description === 'string' && !r.description.includes('<')
-                ? r.description.substring(0, 160)
-                : r.description?.replace(/<[^>]+>/g, '').substring(0, 160)}
-              {(r.description?.length ?? 0) > 160 ? '…' : ''}
+              {r.blocks?.[0]?.contenu?.replace(/<[^>]+>/g, '').substring(0, 160) ?? ''}
+              {(r.blocks?.[0]?.contenu?.replace(/<[^>]+>/g, '')?.length ?? 0) > 160 ? '…' : ''}
             </p>
             <p className="text-xs opacity-60 mt-3">Espérance de vie : {r.esperanceVie}</p>
           </Link>

@@ -28,10 +28,8 @@ export default async function PaysPage() {
           >
             <h2 className="text-2xl font-bold mb-3 text-left" style={{ fontFamily: 'var(--font-heading)', letterSpacing: '0.08em' }}>{p.nom}</h2>
             <p className="text-sm leading-relaxed opacity-90" style={{ fontStyle: 'italic' }}>
-              {typeof p.geographie === 'string' && !p.geographie.includes('<')
-                ? p.geographie.substring(0, 180)
-                : p.geographie?.replace(/<[^>]+>/g, '').substring(0, 180)}
-              {(p.geographie?.length ?? 0) > 180 ? '…' : ''}
+              {p.blocks?.[0]?.contenu?.replace(/<[^>]+>/g, '').substring(0, 180) ?? ''}
+              {(p.blocks?.[0]?.contenu?.replace(/<[^>]+>/g, '')?.length ?? 0) > 180 ? '…' : ''}
             </p>
           </Link>
         ))}

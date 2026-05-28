@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import type { Pays } from '@/data/pays'
-import { WikiEditor } from '@/components/WikiEditor'
+import { BlockEditor } from '@/components/BlockEditor'
 import { RichText } from '@/components/RichText'
 import { DeleteConfirm } from '@/components/DeleteConfirm'
 import { ConflictBanner } from '@/components/ConflictBanner'
@@ -24,20 +24,6 @@ export function PaysDetailClient({ pays: initial, allPays, isLoggedIn, updatedAt
   const [draft, setDraft] = useState<Pays>(initial)
   const [loadedAt] = useState(updatedAt)
   const router = useRouter()
-
-  function field(key: keyof Pays, label: string) {
-    const value = (draft[key] ?? '') as string
-    return (
-      <div className="wiki-card p-6">
-        <h3 className="wiki-section-title">{label}</h3>
-        {editing ? (
-          <WikiEditor content={value} onChange={(html) => setDraft((d) => ({ ...d, [key]: html }))} />
-        ) : (
-          <RichText content={value} />
-        )}
-      </div>
-    )
-  }
 
   async function handleSave() {
     setSaving(true)
@@ -139,16 +125,24 @@ export function PaysDetailClient({ pays: initial, allPays, isLoggedIn, updatedAt
         )}
       </div>
 
-      <div className="space-y-5">
-        {field('geographie', 'Géographie')}
-        {field('histoire', 'Histoire')}
-        {field('politiqueInterne', 'Politique interne')}
-        {field('politiqueExterne', 'Politique externe')}
-        {field('modeDeVie', 'Mode de vie')}
-        {(draft.magie || editing) && field('magie', 'Magie')}
-        {field('traditions', 'Traditions')}
-        {field('societe', 'Société')}
-      </div>
+      {editing ? (
+        <BlockEditor
+          blocks={draft.blocks}
+          onChange={(blocks) => setDraft((d) => ({ ...d, blocks }))}
+        />
+      ) : (
+        <div className="space-y-5">
+          {draft.blocks.map((b) => (
+            <div key={b.id} className="wiki-card p-6">
+              {b.titre && <h3 className="wiki-section-title">{b.titre}</h3>}
+              <RichText content={b.contenu} />
+            </div>
+          ))}
+          {draft.blocks.length === 0 && (
+            <p className="text-gray-400 italic text-sm text-center py-8">Aucun contenu.{isLoggedIn ? ' Clique sur Modifier pour ajouter des blocs.' : ''}</p>
+          )}
+        </div>
+      )}
 
       <div className="mt-10 flex gap-3 flex-wrap">
         {allPays.filter((x) => x.slug !== draft.slug).map((other) => (

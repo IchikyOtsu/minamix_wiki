@@ -3,8 +3,9 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { WikiEditor } from '@/components/WikiEditor'
+import { BlockEditor } from '@/components/BlockEditor'
 import { upsertPays } from '@/app/pays/[slug]/actions'
+import type { Block } from '@/types/blocks'
 
 function toSlug(s: string) {
   return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
@@ -15,14 +16,7 @@ export default function NouveauPaysPage() {
   const [saving, setSaving] = useState(false)
   const [nom, setNom] = useState('')
   const [couleur, setCouleur] = useState('#747474')
-  const [geographie, setGeographie] = useState('')
-  const [histoire, setHistoire] = useState('')
-  const [politiqueInterne, setPolitiqueInterne] = useState('')
-  const [politiqueExterne, setPolitiqueExterne] = useState('')
-  const [modeDeVie, setModeDeVie] = useState('')
-  const [magie, setMagie] = useState('')
-  const [traditions, setTraditions] = useState('')
-  const [societe, setSociete] = useState('')
+  const [blocks, setBlocks] = useState<Block[]>([])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -30,7 +24,7 @@ export default function NouveauPaysPage() {
     setSaving(true)
     const slug = toSlug(nom)
     try {
-      await upsertPays(slug, { nom, couleur, geographie, histoire, politiqueInterne, politiqueExterne, modeDeVie, magie: magie || undefined, traditions, societe })
+      await upsertPays(slug, { nom, couleur, blocks })
       router.push(`/pays/${slug}`)
       router.refresh()
     } catch {
@@ -47,7 +41,6 @@ export default function NouveauPaysPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Nom + couleur */}
         <div className="bg-white rounded-xl shadow p-6 space-y-4">
           <div className="flex gap-4 items-end">
             <div className="flex-1">
@@ -62,26 +55,7 @@ export default function NouveauPaysPage() {
           </div>
         </div>
 
-        {[
-          ['Géographie', geographie, setGeographie],
-          ['Histoire', histoire, setHistoire],
-          ['Politique interne', politiqueInterne, setPolitiqueInterne],
-          ['Politique externe', politiqueExterne, setPolitiqueExterne],
-          ['Mode de vie', modeDeVie, setModeDeVie],
-          ['Magie (optionnel)', magie, setMagie],
-          ['Société', societe, setSociete],
-        ].map(([label, value, setter]) => (
-          <div key={label as string} className="bg-white rounded-xl shadow p-6">
-            <label className="block text-sm font-semibold mb-2">{label as string}</label>
-            <WikiEditor content={value as string} onChange={setter as (v: string) => void} />
-          </div>
-        ))}
-
-        {/* Traditions */}
-        <div className="bg-white rounded-xl shadow p-6">
-          <label className="block text-sm font-semibold mb-3">Traditions</label>
-          <WikiEditor content={traditions} onChange={setTraditions} />
-        </div>
+        <BlockEditor blocks={blocks} onChange={setBlocks} />
 
         <div className="flex gap-3 justify-end">
           <Link href="/pays" className="px-5 py-2 bg-gray-200 rounded-lg text-sm hover:bg-gray-300 transition-colors">Annuler</Link>

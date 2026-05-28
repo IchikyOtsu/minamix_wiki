@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import type { Ryximus } from '@/data/ryximus'
 import { WikiEditor } from '@/components/WikiEditor'
+import { BlockEditor } from '@/components/BlockEditor'
 import { RichText } from '@/components/RichText'
 import { DeleteConfirm } from '@/components/DeleteConfirm'
 import { ConflictBanner } from '@/components/ConflictBanner'
@@ -24,20 +25,6 @@ export function RyximusDetailClient({ ryximus: initial, allRyximus, isLoggedIn, 
   const [draft, setDraft] = useState<Ryximus>(initial)
   const [loadedAt] = useState(updatedAt)
   const router = useRouter()
-
-  function field(key: keyof Ryximus, label: string) {
-    const value = (draft[key] ?? '') as string
-    return (
-      <div className="wiki-card p-6">
-        <h3 className="wiki-section-title">{label}</h3>
-        {editing ? (
-          <WikiEditor content={value} onChange={(html) => setDraft((d) => ({ ...d, [key]: html }))} />
-        ) : (
-          <RichText content={value} />
-        )}
-      </div>
-    )
-  }
 
   async function handleSave() {
     setSaving(true)
@@ -143,16 +130,40 @@ export function RyximusDetailClient({ ryximus: initial, allRyximus, isLoggedIn, 
       </div>
 
       <div className="space-y-5">
-        {field('personnalite', 'Personnalité')}
+        {/* Personnalité */}
+        <div className="wiki-card p-6">
+          <h3 className="wiki-section-title">Personnalité</h3>
+          {editing ? (
+            <WikiEditor content={draft.personnalite} onChange={(html) => setDraft((d) => ({ ...d, personnalite: html }))} />
+          ) : (
+            <RichText content={draft.personnalite} />
+          )}
+        </div>
 
+        {/* Condition du Pacte */}
         <div className="wiki-card p-6 border-l-4" style={{ borderColor: draft.couleur }}>
           <h3 className="wiki-section-title">Condition du Pacte</h3>
           {editing ? (
-            <WikiEditor content={(draft.conditionPacte ?? '') as string} onChange={(html) => setDraft((d) => ({ ...d, conditionPacte: html }))} />
+            <WikiEditor content={draft.conditionPacte} onChange={(html) => setDraft((d) => ({ ...d, conditionPacte: html }))} />
           ) : (
             <RichText content={draft.conditionPacte} />
           )}
         </div>
+
+        {/* Extra blocks */}
+        {editing ? (
+          <BlockEditor
+            blocks={draft.blocks ?? []}
+            onChange={(blocks) => setDraft((d) => ({ ...d, blocks }))}
+          />
+        ) : (
+          (draft.blocks ?? []).map((b) => (
+            <div key={b.id} className="wiki-card p-6">
+              {b.titre && <h3 className="wiki-section-title">{b.titre}</h3>}
+              <RichText content={b.contenu} />
+            </div>
+          ))
+        )}
       </div>
 
       <div className="mt-10 flex gap-3 flex-wrap">

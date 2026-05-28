@@ -65,9 +65,7 @@ export default async function Home() {
             >
               <div className="text-base font-semibold mb-2 text-center" style={{ fontFamily: 'var(--font-heading)', letterSpacing: '0.08em' }}>{p.nom}</div>
               <div className="text-xs font-normal opacity-80 leading-relaxed text-center" style={{ fontStyle: 'italic' }}>
-                {typeof p.geographie === 'string' && !p.geographie.includes('<')
-                  ? p.geographie.substring(0, 75)
-                  : p.geographie?.replace(/<[^>]+>/g, '').substring(0, 75)}…
+                {p.blocks?.[0]?.contenu?.replace(/<[^>]+>/g, '').substring(0, 75) ?? ''}…
               </div>
             </Link>
           ))}

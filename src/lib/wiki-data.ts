@@ -3,6 +3,7 @@ import { pays as staticPays, type Pays } from '@/data/pays'
 import { races as staticRaces, type Race } from '@/data/races'
 import { ryximus as staticRyximus, type Ryximus } from '@/data/ryximus'
 import { magie as staticMagie } from '@/data/magie'
+import type { Block } from '@/types/blocks'
 
 type MagieData = typeof staticMagie
 type AnnexeData = { label: string; titre: string; contenu: string }
@@ -10,6 +11,58 @@ export type AnnexeWithTs = AnnexeData & { updatedAt: string | null }
 
 function isConfigured(): boolean {
   return !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
+}
+
+function makeBlock(titre: string, contenu: unknown, type: Block['type'] = 'text'): Block | null {
+  if (!contenu || typeof contenu !== 'string' || !contenu.trim()) return null
+  return { id: titre.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''), type, titre, contenu }
+}
+
+function migratePaysData(slug: string, data: unknown): Pays {
+  const d = data as Record<string, unknown>
+  if (Array.isArray(d.blocks)) return { slug, nom: String(d.nom ?? ''), couleur: String(d.couleur ?? '#747474'), blocks: d.blocks as Block[] }
+  const blocks: Block[] = [
+    makeBlock('Géographie', d.geographie),
+    makeBlock('Histoire', d.histoire),
+    makeBlock('Politique interne', d.politiqueInterne),
+    makeBlock('Politique externe', d.politiqueExterne),
+    makeBlock('Mode de vie', d.modeDeVie),
+    makeBlock('Traditions', d.traditions, 'list'),
+    makeBlock('Société', d.societe),
+    makeBlock('Magie', d.magie),
+  ].filter((b): b is Block => b !== null)
+  return { slug, nom: String(d.nom ?? ''), couleur: String(d.couleur ?? '#747474'), blocks }
+}
+
+function migrateRaceData(slug: string, data: unknown): Race {
+  const d = data as Record<string, unknown>
+  if (Array.isArray(d.blocks)) {
+    return {
+      slug,
+      nom: String(d.nom ?? ''),
+      couleur: String(d.couleur ?? '#747474'),
+      image: String(d.image ?? ''),
+      population: Number(d.population ?? 0),
+      esperanceVie: String(d.esperanceVie ?? ''),
+      blocks: d.blocks as Block[],
+    }
+  }
+  const blocks: Block[] = [
+    makeBlock('Description', d.description),
+    makeBlock('Histoire', d.histoire),
+    makeBlock('Apparence physique', d.physique),
+    makeBlock('Magie', d.magie),
+    makeBlock('Société', d.societe),
+  ].filter((b): b is Block => b !== null)
+  return {
+    slug,
+    nom: String(d.nom ?? ''),
+    couleur: String(d.couleur ?? '#747474'),
+    image: String(d.image ?? ''),
+    population: Number(d.population ?? 0),
+    esperanceVie: String(d.esperanceVie ?? ''),
+    blocks,
+  }
 }
 
 // ── Pays ──────────────────────────────────────────────────────────────────────
@@ -20,7 +73,7 @@ export async function getAllPays(): Promise<Pays[]> {
     const supabase = await createClient()
     const { data } = await supabase.from('pays').select('slug, data')
     if (!data?.length) return staticPays
-    return data.map((row) => ({ slug: row.slug, ...(row.data as Omit<Pays, 'slug'>) }))
+    return data.map((row) => migratePaysData(row.slug, row.data))
   } catch {
     return staticPays
   }
@@ -38,7 +91,7 @@ export async function getPays(slug: string): Promise<{ data: Pays | null; update
       return { data: staticPays.find((p) => p.slug === slug) ?? null, updatedAt: null }
     }
     return {
-      data: { slug: row.slug, ...(row.data as Omit<Pays, 'slug'>) },
+      data: migratePaysData(row.slug, row.data),
       updatedAt: row.updated_at ?? null,
     }
   } catch {
@@ -54,7 +107,7 @@ export async function getAllRaces(): Promise<Race[]> {
     const supabase = await createClient()
     const { data } = await supabase.from('races').select('slug, data')
     if (!data?.length) return staticRaces
-    return data.map((row) => ({ slug: row.slug, ...(row.data as Omit<Race, 'slug'>) }))
+    return data.map((row) => migrateRaceData(row.slug, row.data))
   } catch {
     return staticRaces
   }
@@ -72,7 +125,7 @@ export async function getRace(slug: string): Promise<{ data: Race | null; update
       return { data: staticRaces.find((r) => r.slug === slug) ?? null, updatedAt: null }
     }
     return {
-      data: { slug: row.slug, ...(row.data as Omit<Race, 'slug'>) },
+      data: migrateRaceData(row.slug, row.data),
       updatedAt: row.updated_at ?? null,
     }
   } catch {

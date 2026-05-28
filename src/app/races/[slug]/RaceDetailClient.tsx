@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import type { Race } from '@/data/races'
-import { WikiEditor } from '@/components/WikiEditor'
+import { BlockEditor } from '@/components/BlockEditor'
 import { RichText } from '@/components/RichText'
 import { DeleteConfirm } from '@/components/DeleteConfirm'
 import { ConflictBanner } from '@/components/ConflictBanner'
@@ -24,20 +24,6 @@ export function RaceDetailClient({ race: initial, allRaces, isLoggedIn, updatedA
   const [draft, setDraft] = useState<Race>(initial)
   const [loadedAt] = useState(updatedAt)
   const router = useRouter()
-
-  function field(key: keyof Race, label: string) {
-    const value = (draft[key] ?? '') as string
-    return (
-      <div className="wiki-card p-6">
-        <h3 className="wiki-section-title">{label}</h3>
-        {editing ? (
-          <WikiEditor content={value} onChange={(html) => setDraft((d) => ({ ...d, [key]: html }))} />
-        ) : (
-          <RichText content={value} />
-        )}
-      </div>
-    )
-  }
 
   async function handleSave() {
     setSaving(true)
@@ -140,13 +126,24 @@ export function RaceDetailClient({ race: initial, allRaces, isLoggedIn, updatedA
         </div>
       </div>
 
-      <div className="space-y-5">
-        {field('description', 'Description')}
-        {field('histoire', 'Histoire')}
-        {field('physique', 'Apparence physique')}
-        {field('magie', 'Magie')}
-        {field('societe', 'Société')}
-      </div>
+      {editing ? (
+        <BlockEditor
+          blocks={draft.blocks}
+          onChange={(blocks) => setDraft((d) => ({ ...d, blocks }))}
+        />
+      ) : (
+        <div className="space-y-5">
+          {draft.blocks.map((b) => (
+            <div key={b.id} className="wiki-card p-6">
+              {b.titre && <h3 className="wiki-section-title">{b.titre}</h3>}
+              <RichText content={b.contenu} />
+            </div>
+          ))}
+          {draft.blocks.length === 0 && (
+            <p className="text-gray-400 italic text-sm text-center py-8">Aucun contenu.{isLoggedIn ? ' Clique sur Modifier pour ajouter des blocs.' : ''}</p>
+          )}
+        </div>
+      )}
 
       <div className="mt-10 flex gap-3 flex-wrap">
         {allRaces.filter((x) => x.slug !== draft.slug).map((other) => (
