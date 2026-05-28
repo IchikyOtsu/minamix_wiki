@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import type { Ryximus } from '@/data/ryximus'
 import { WikiEditor } from '@/components/WikiEditor'
 import { BlockEditor } from '@/components/BlockEditor'
+import { BlockView } from '@/components/BlockView'
 import { RichText } from '@/components/RichText'
 import { DeleteConfirm } from '@/components/DeleteConfirm'
 import { ConflictBanner } from '@/components/ConflictBanner'
@@ -159,12 +160,7 @@ export function RyximusDetailClient({ ryximus: initial, allRyximus, isLoggedIn, 
             onChange={(blocks) => setDraft((d) => ({ ...d, blocks }))}
           />
         ) : (
-          (draft.blocks ?? []).map((b) => (
-            <div key={b.id} className="wiki-card p-6">
-              {b.titre && <h3 className="wiki-section-title">{b.titre}</h3>}
-              <RichText content={b.contenu} />
-            </div>
-          ))
+          (draft.blocks ?? []).map((b) => <BlockView key={b.id} block={b} />)
         )}
       </div>
 

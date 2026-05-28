@@ -1,6 +1,6 @@
 export interface Block {
   id: string
-  type: 'text' | 'list'
+  type: 'text' | 'list' | 'image'
   titre: string
   contenu: string
 }

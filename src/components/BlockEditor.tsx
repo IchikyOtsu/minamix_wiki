@@ -1,6 +1,8 @@
 'use client'
 
+import { useState, useRef } from 'react'
 import { WikiEditor } from './WikiEditor'
+import { createClient } from '@/lib/supabase/client'
 import type { Block } from '@/types/blocks'
 
 interface Props {
@@ -9,7 +11,10 @@ interface Props {
 }
 
 export function BlockEditor({ blocks, onChange }: Props) {
-  function add(type: 'text' | 'list') {
+  const [uploading, setUploading] = useState<Record<string, boolean>>({})
+  const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({})
+
+  function add(type: Block['type']) {
     const id = crypto.randomUUID()
     const contenu = type === 'list' ? '<ul><li></li></ul>' : ''
     onChange([...blocks, { id, type, titre: '', contenu }])
@@ -30,6 +35,23 @@ export function BlockEditor({ blocks, onChange }: Props) {
     ;[next[i], next[j]] = [next[j], next[i]]
     onChange(next)
   }
+
+  async function handleImageUpload(blockId: string, file: File) {
+    setUploading((u) => ({ ...u, [blockId]: true }))
+    try {
+      const supabase = createClient()
+      const ext = file.name.split('.').pop() ?? 'jpg'
+      const path = `${crypto.randomUUID()}.${ext}`
+      const { error } = await supabase.storage.from('images').upload(path, file, { upsert: false })
+      if (error) { alert('Erreur upload : ' + error.message); return }
+      const { data } = supabase.storage.from('images').getPublicUrl(path)
+      update(blockId, { contenu: data.publicUrl })
+    } finally {
+      setUploading((u) => ({ ...u, [blockId]: false }))
+    }
+  }
+
+  const typeLabel: Record<Block['type'], string> = { text: 'Texte', list: 'Liste', image: 'Image' }
 
   return (
     <div className="space-y-4">
@@ -52,15 +74,18 @@ export function BlockEditor({ blocks, onChange }: Props) {
                 title="Descendre"
               >▼</button>
             </div>
+
             <input
               value={b.titre}
               onChange={(e) => update(b.id, { titre: e.target.value })}
               className="flex-1 border border-gray-200 rounded-lg px-3 py-1.5 font-semibold text-base focus:outline-none focus:border-blue-400 bg-transparent"
-              placeholder="Titre du bloc…"
+              placeholder={b.type === 'image' ? 'Légende (optionnel)…' : 'Titre du bloc…'}
             />
+
             <span className="shrink-0 text-xs bg-gray-100 rounded-full px-2.5 py-1 text-gray-500 font-medium">
-              {b.type === 'list' ? 'Liste' : 'Texte'}
+              {typeLabel[b.type]}
             </span>
+
             <button
               type="button"
               onClick={() => remove(b.id)}
@@ -68,10 +93,48 @@ export function BlockEditor({ blocks, onChange }: Props) {
               title="Supprimer ce bloc"
             >×</button>
           </div>
-          <WikiEditor
-            content={b.contenu}
-            onChange={(html) => update(b.id, { contenu: html })}
-          />
+
+          {b.type === 'image' ? (
+            <div>
+              {b.contenu && (
+                <div className="mb-3 rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center">
+                  <img src={b.contenu} alt={b.titre || ''} className="max-h-64 max-w-full object-contain" />
+                </div>
+              )}
+              <label className={`flex items-center justify-center gap-2 w-full py-2.5 rounded-lg border-2 border-dashed cursor-pointer transition-colors text-sm font-medium
+                ${uploading[b.id]
+                  ? 'border-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'border-gray-300 text-gray-500 hover:border-[var(--gold)] hover:text-gray-700'
+                }`}
+              >
+                {uploading[b.id] ? (
+                  <span>Upload en cours…</span>
+                ) : (
+                  <>
+                    <span>🖼</span>
+                    <span>{b.contenu ? "Changer l'image" : 'Choisir une image'}</span>
+                  </>
+                )}
+                <input
+                  ref={(el) => { fileInputRefs.current[b.id] = el }}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  disabled={uploading[b.id]}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) handleImageUpload(b.id, file)
+                    e.target.value = ''
+                  }}
+                />
+              </label>
+            </div>
+          ) : (
+            <WikiEditor
+              content={b.contenu}
+              onChange={(html) => update(b.id, { contenu: html })}
+            />
+          )}
         </div>
       ))}
 
@@ -79,16 +142,23 @@ export function BlockEditor({ blocks, onChange }: Props) {
         <button
           type="button"
           onClick={() => add('text')}
-          className="flex-1 min-w-32 py-3 border-2 border-dashed border-gray-300 rounded-xl text-gray-500 hover:border-[var(--gold)] hover:text-gray-700 transition-colors text-sm font-medium"
+          className="flex-1 min-w-28 py-3 border-2 border-dashed border-gray-300 rounded-xl text-gray-500 hover:border-[var(--gold)] hover:text-gray-700 transition-colors text-sm font-medium"
         >
-          + Ajouter un bloc texte
+          + Texte
         </button>
         <button
           type="button"
           onClick={() => add('list')}
-          className="flex-1 min-w-32 py-3 border-2 border-dashed border-gray-300 rounded-xl text-gray-500 hover:border-[var(--gold)] hover:text-gray-700 transition-colors text-sm font-medium"
+          className="flex-1 min-w-28 py-3 border-2 border-dashed border-gray-300 rounded-xl text-gray-500 hover:border-[var(--gold)] hover:text-gray-700 transition-colors text-sm font-medium"
         >
-          + Ajouter une liste
+          + Liste
+        </button>
+        <button
+          type="button"
+          onClick={() => add('image')}
+          className="flex-1 min-w-28 py-3 border-2 border-dashed border-gray-300 rounded-xl text-gray-500 hover:border-[var(--gold)] hover:text-gray-700 transition-colors text-sm font-medium"
+        >
+          + Image
         </button>
       </div>
     </div>

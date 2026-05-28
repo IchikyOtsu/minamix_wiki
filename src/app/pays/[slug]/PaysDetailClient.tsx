@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import type { Pays } from '@/data/pays'
 import { BlockEditor } from '@/components/BlockEditor'
-import { RichText } from '@/components/RichText'
+import { BlockView } from '@/components/BlockView'
 import { DeleteConfirm } from '@/components/DeleteConfirm'
 import { ConflictBanner } from '@/components/ConflictBanner'
 import { upsertPays, deletePays } from './actions'
@@ -134,12 +134,7 @@ export function PaysDetailClient({ pays: initial, allPays, isLoggedIn, updatedAt
         />
       ) : (
         <div className="space-y-5">
-          {draft.blocks.map((b) => (
-            <div key={b.id} className="wiki-card p-6">
-              {b.titre && <h3 className="wiki-section-title">{b.titre}</h3>}
-              <RichText content={b.contenu} />
-            </div>
-          ))}
+          {draft.blocks.map((b) => <BlockView key={b.id} block={b} />)}
           {draft.blocks.length === 0 && (
             <p className="text-gray-400 italic text-sm text-center py-8">Aucun contenu.{isLoggedIn ? ' Clique sur Modifier pour ajouter des blocs.' : ''}</p>
           )}
