@@ -42,30 +42,28 @@ export function PaysDetailClient({ pays: initial, allPays, isLoggedIn, updatedAt
   async function handleSave() {
     setSaving(true)
     setConflict(false)
-    try {
-      const { slug, ...fields } = draft
-      await upsertPays(slug, fields, loadedAt)
+    const { slug, ...fields } = draft
+    const result = await upsertPays(slug, fields, loadedAt)
+    if (result.ok) {
       setEditing(false)
       router.refresh()
-    } catch (err) {
-      if (err instanceof Error && err.message === 'CONFLICT') {
-        setConflict(true)
-      } else {
-        alert('Erreur lors de la sauvegarde.')
-      }
+    } else if (result.conflict) {
+      setConflict(true)
+    } else {
+      alert('Erreur lors de la sauvegarde.')
     }
     setSaving(false)
   }
 
   async function handleForceSave() {
     setSaving(true)
-    try {
-      const { slug, ...fields } = draft
-      await upsertPays(slug, fields, null)
+    const { slug, ...fields } = draft
+    const result = await upsertPays(slug, fields, null)
+    if (result.ok) {
       setConflict(false)
       setEditing(false)
       router.refresh()
-    } catch {
+    } else {
       alert('Erreur lors de la sauvegarde.')
     }
     setSaving(false)

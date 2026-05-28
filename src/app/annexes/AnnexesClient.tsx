@@ -43,16 +43,14 @@ export function AnnexesClient({ annexes: initial, isLoggedIn }: Props) {
     setSaving(true)
     setConflicts((c) => ({ ...c, [label]: false }))
     const a = getAnnexe(label)
-    try {
-      await upsertAnnexe(label, a.titre, a.contenu, loadedAts[label] ?? null)
+    const result = await upsertAnnexe(label, a.titre, a.contenu, loadedAts[label] ?? null)
+    if (result.ok) {
       setEditingLabel(null)
       router.refresh()
-    } catch (err) {
-      if (err instanceof Error && err.message === 'CONFLICT') {
-        setConflicts((c) => ({ ...c, [label]: true }))
-      } else {
-        alert('Erreur lors de la sauvegarde.')
-      }
+    } else if (result.conflict) {
+      setConflicts((c) => ({ ...c, [label]: true }))
+    } else {
+      alert('Erreur lors de la sauvegarde.')
     }
     setSaving(false)
   }
@@ -60,12 +58,12 @@ export function AnnexesClient({ annexes: initial, isLoggedIn }: Props) {
   async function handleForceSave(label: string) {
     setSaving(true)
     const a = getAnnexe(label)
-    try {
-      await upsertAnnexe(label, a.titre, a.contenu, null)
+    const result = await upsertAnnexe(label, a.titre, a.contenu, null)
+    if (result.ok) {
       setConflicts((c) => ({ ...c, [label]: false }))
       setEditingLabel(null)
       router.refresh()
-    } catch {
+    } else {
       alert('Erreur lors de la sauvegarde.')
     }
     setSaving(false)
