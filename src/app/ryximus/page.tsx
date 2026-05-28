@@ -32,7 +32,9 @@ export default async function RyximusPage() {
                 {r.element}
               </span>
             </div>
-            <p className="text-sm opacity-90 italic leading-relaxed">&ldquo;{r.citation}&rdquo;</p>
+            <p className="text-sm opacity-80 leading-relaxed">
+              {r.personnalite?.replace(/<[^>]+>/g, '').substring(0, 120)}…
+            </p>
             <p className="text-xs opacity-55 mt-3" style={{ fontFamily: 'var(--font-heading)', letterSpacing: '0.06em' }}>{r.genre}</p>
           </Link>
         ))}
