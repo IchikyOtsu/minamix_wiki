@@ -13,7 +13,7 @@ export async function upsertPays(slug: string, fields: Omit<Pays, 'slug'>, loade
 
   if (loadedAt) {
     const { data: current } = await supabase.from('pays').select('updated_at').eq('slug', slug).maybeSingle()
-    if (current?.updated_at && current.updated_at !== loadedAt) {
+    if (current?.updated_at && new Date(current.updated_at).getTime() !== new Date(loadedAt).getTime()) {
       return { ok: false, conflict: true }
     }
   }

@@ -15,7 +15,7 @@ export async function upsertMagie(fields: MagieFields, loadedAt: string | null =
 
   if (loadedAt) {
     const { data: current } = await supabase.from('magie').select('updated_at').eq('id', 1).maybeSingle()
-    if (current?.updated_at && current.updated_at !== loadedAt) {
+    if (current?.updated_at && new Date(current.updated_at).getTime() !== new Date(loadedAt).getTime()) {
       return { ok: false, conflict: true }
     }
   }

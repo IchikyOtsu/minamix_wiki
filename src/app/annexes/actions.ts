@@ -12,7 +12,7 @@ export async function upsertAnnexe(label: string, titre: string, contenu: string
 
   if (loadedAt) {
     const { data: current } = await supabase.from('annexes').select('updated_at').eq('label', label).maybeSingle()
-    if (current?.updated_at && current.updated_at !== loadedAt) {
+    if (current?.updated_at && new Date(current.updated_at).getTime() !== new Date(loadedAt).getTime()) {
       return { ok: false, conflict: true }
     }
   }

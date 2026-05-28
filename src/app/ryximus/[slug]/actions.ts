@@ -13,7 +13,7 @@ export async function upsertRyximus(slug: string, fields: Omit<Ryximus, 'slug'>,
 
   if (loadedAt) {
     const { data: current } = await supabase.from('ryximus').select('updated_at').eq('slug', slug).maybeSingle()
-    if (current?.updated_at && current.updated_at !== loadedAt) {
+    if (current?.updated_at && new Date(current.updated_at).getTime() !== new Date(loadedAt).getTime()) {
       return { ok: false, conflict: true }
     }
   }
