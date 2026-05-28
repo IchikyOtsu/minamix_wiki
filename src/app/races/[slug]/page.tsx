@@ -4,14 +4,14 @@ import { RaceDetailClient } from './RaceDetailClient'
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const r = await getRace(slug)
+  const { data: r } = await getRace(slug)
   return { title: r ? `MINAMIX — ${r.nom}` : 'MINAMIX' }
 }
 
 export default async function RaceDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const [r, allRaces, user] = await Promise.all([getRace(slug), getAllRaces(), getCurrentUser()])
+  const [{ data: r, updatedAt }, allRaces, user] = await Promise.all([getRace(slug), getAllRaces(), getCurrentUser()])
   if (!r) notFound()
 
-  return <RaceDetailClient race={r} allRaces={allRaces} isLoggedIn={!!user} />
+  return <RaceDetailClient race={r} allRaces={allRaces} isLoggedIn={!!user} updatedAt={updatedAt} />
 }

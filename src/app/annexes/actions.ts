@@ -3,10 +3,17 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
-export async function upsertAnnexe(label: string, titre: string, contenu: string) {
+export async function upsertAnnexe(label: string, titre: string, contenu: string, loadedAt: string | null = null) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Non autorisé')
+
+  if (loadedAt) {
+    const { data: current } = await supabase.from('annexes').select('updated_at').eq('label', label).maybeSingle()
+    if (current?.updated_at && current.updated_at !== loadedAt) {
+      throw new Error('CONFLICT')
+    }
+  }
 
   const { error } = await supabase
     .from('annexes')

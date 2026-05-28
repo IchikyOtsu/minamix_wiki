@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { WikiEditor } from '@/components/WikiEditor'
 import { RichText } from '@/components/RichText'
+import { ConflictBanner } from '@/components/ConflictBanner'
 import { upsertMagie } from './actions'
 
 type Section = { titre: string; contenu: string }
@@ -13,18 +14,39 @@ type MagieData = { intro: string; sections: Section[]; affinites: Affinite[] }
 interface Props {
   data: MagieData
   isLoggedIn: boolean
+  updatedAt: string | null
 }
 
-export function MagieClient({ data: initial, isLoggedIn }: Props) {
+export function MagieClient({ data: initial, isLoggedIn, updatedAt }: Props) {
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [conflict, setConflict] = useState(false)
   const [draft, setDraft] = useState<MagieData>(initial)
+  const [loadedAt] = useState(updatedAt)
   const router = useRouter()
 
   async function handleSave() {
     setSaving(true)
+    setConflict(false)
     try {
-      await upsertMagie(draft)
+      await upsertMagie(draft, loadedAt)
+      setEditing(false)
+      router.refresh()
+    } catch (err) {
+      if (err instanceof Error && err.message === 'CONFLICT') {
+        setConflict(true)
+      } else {
+        alert('Erreur lors de la sauvegarde.')
+      }
+    }
+    setSaving(false)
+  }
+
+  async function handleForceSave() {
+    setSaving(true)
+    try {
+      await upsertMagie(draft, null)
+      setConflict(false)
       setEditing(false)
       router.refresh()
     } catch {
@@ -39,7 +61,14 @@ export function MagieClient({ data: initial, isLoggedIn }: Props) {
         <div className="wiki-edit-bar">
           {editing ? (
             <>
-              <button onClick={() => { setDraft(initial); setEditing(false) }} className="btn-wiki btn-wiki-ghost">Annuler</button>
+              {conflict && (
+                <ConflictBanner
+                  saving={saving}
+                  onForce={handleForceSave}
+                  onCancel={() => { setConflict(false); setDraft(initial); setEditing(false); router.refresh() }}
+                />
+              )}
+              <button onClick={() => { setDraft(initial); setEditing(false); setConflict(false) }} className="btn-wiki btn-wiki-ghost">Annuler</button>
               <button onClick={handleSave} disabled={saving} className="btn-wiki btn-wiki-primary disabled:opacity-60">
                 {saving ? 'Sauvegarde…' : '✓ Sauvegarder'}
               </button>
@@ -57,7 +86,7 @@ export function MagieClient({ data: initial, isLoggedIn }: Props) {
         {editing ? (
           <WikiEditor content={draft.intro} onChange={(html) => setDraft((d) => ({ ...d, intro: html }))} />
         ) : (
-          <p className="text-justify leading-relaxed text-gray-800 text-lg italic">{draft.intro}</p>
+          <p className="text-justify leading-relaxed text-lg italic" style={{ color: 'var(--ink)' }}>{draft.intro}</p>
         )}
       </div>
 
@@ -153,7 +182,7 @@ export function MagieClient({ data: initial, isLoggedIn }: Props) {
             {draft.affinites.map((a) => (
               <div key={a.element} className="rounded-xl p-4 text-center border-2 border-gray-100 hover:border-[var(--gold)] transition-colors">
                 <div className="text-lg font-bold mb-1" style={{ fontFamily: 'var(--font-heading)' }}>{a.element}</div>
-                <div className="text-xs text-gray-600">{a.description}</div>
+                {a.description && <div className="text-xs text-gray-600">{a.description}</div>}
               </div>
             ))}
           </div>

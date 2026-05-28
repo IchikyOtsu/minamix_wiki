@@ -5,12 +5,12 @@ import { useRouter } from 'next/navigation'
 import { WikiEditor } from '@/components/WikiEditor'
 import { RichText } from '@/components/RichText'
 import { DeleteConfirm } from '@/components/DeleteConfirm'
+import { ConflictBanner } from '@/components/ConflictBanner'
 import { upsertAnnexe, deleteAnnexe } from './actions'
-
-type Annexe = { label: string; titre: string; contenu: string }
+import type { AnnexeWithTs } from '@/lib/wiki-data'
 
 interface Props {
-  annexes: Annexe[]
+  annexes: AnnexeWithTs[]
   isLoggedIn: boolean
 }
 
@@ -19,26 +19,50 @@ function toLabel(s: string) {
 }
 
 export function AnnexesClient({ annexes: initial, isLoggedIn }: Props) {
-  const [annexes, setAnnexes] = useState<Annexe[]>(initial)
+  const [annexes, setAnnexes] = useState<AnnexeWithTs[]>(initial)
   const [editingLabel, setEditingLabel] = useState<string | null>(null)
-  const [drafts, setDrafts] = useState<Record<string, Annexe>>(
+  const [drafts, setDrafts] = useState<Record<string, AnnexeWithTs>>(
     Object.fromEntries(initial.map((a) => [a.label, a]))
   )
+  // Snapshot of updatedAt per annexe at page load — used for conflict detection
+  const [loadedAts] = useState<Record<string, string | null>>(
+    Object.fromEntries(initial.map((a) => [a.label, a.updatedAt]))
+  )
   const [saving, setSaving] = useState(false)
+  const [conflicts, setConflicts] = useState<Record<string, boolean>>({})
   const [showNewForm, setShowNewForm] = useState(false)
   const [newTitre, setNewTitre] = useState('')
   const [creatingNew, setCreatingNew] = useState(false)
   const router = useRouter()
 
-  function getAnnexe(label: string): Annexe {
-    return drafts[label] ?? { label, titre: `Annexe ${label}`, contenu: '' }
+  function getAnnexe(label: string): AnnexeWithTs {
+    return drafts[label] ?? { label, titre: `Annexe ${label}`, contenu: '', updatedAt: null }
   }
 
   async function handleSave(label: string) {
     setSaving(true)
+    setConflicts((c) => ({ ...c, [label]: false }))
     const a = getAnnexe(label)
     try {
-      await upsertAnnexe(label, a.titre, a.contenu)
+      await upsertAnnexe(label, a.titre, a.contenu, loadedAts[label] ?? null)
+      setEditingLabel(null)
+      router.refresh()
+    } catch (err) {
+      if (err instanceof Error && err.message === 'CONFLICT') {
+        setConflicts((c) => ({ ...c, [label]: true }))
+      } else {
+        alert('Erreur lors de la sauvegarde.')
+      }
+    }
+    setSaving(false)
+  }
+
+  async function handleForceSave(label: string) {
+    setSaving(true)
+    const a = getAnnexe(label)
+    try {
+      await upsertAnnexe(label, a.titre, a.contenu, null)
+      setConflicts((c) => ({ ...c, [label]: false }))
       setEditingLabel(null)
       router.refresh()
     } catch {
@@ -51,9 +75,9 @@ export function AnnexesClient({ annexes: initial, isLoggedIn }: Props) {
     if (!newTitre.trim()) return
     setCreatingNew(true)
     const label = toLabel(newTitre) || `annexe-${Date.now()}`
-    const newAnnexe: Annexe = { label, titre: newTitre, contenu: '' }
+    const newAnnexe: AnnexeWithTs = { label, titre: newTitre, contenu: '', updatedAt: null }
     try {
-      await upsertAnnexe(label, newTitre, '')
+      await upsertAnnexe(label, newTitre, '', null)
       setAnnexes((prev) => [...prev, newAnnexe])
       setDrafts((d) => ({ ...d, [label]: newAnnexe }))
       setNewTitre('')
@@ -76,7 +100,6 @@ export function AnnexesClient({ annexes: initial, isLoggedIn }: Props) {
         )}
       </div>
 
-      {/* New annexe form */}
       {isLoggedIn && showNewForm && (
         <div className="wiki-card p-5 mb-6 border-2 border-dashed border-blue-300">
           <p className="text-sm font-semibold mb-3">Titre de la nouvelle annexe</p>
@@ -98,7 +121,6 @@ export function AnnexesClient({ annexes: initial, isLoggedIn }: Props) {
         </div>
       )}
 
-      {/* Quick nav */}
       {annexes.length > 0 && (
         <div className="wiki-card p-4 mb-8 flex flex-wrap gap-2 justify-center">
           {annexes.map((a) => {
@@ -116,6 +138,7 @@ export function AnnexesClient({ annexes: initial, isLoggedIn }: Props) {
         {annexes.map((a) => {
           const draft = getAnnexe(a.label)
           const isEditing = editingLabel === a.label
+          const hasConflict = conflicts[a.label] ?? false
 
           return (
             <div key={a.label} id={a.label} className="wiki-card p-6">
@@ -145,7 +168,10 @@ export function AnnexesClient({ annexes: initial, isLoggedIn }: Props) {
                             router.refresh()
                           }}
                         />
-                        <button onClick={() => { setDrafts((d) => ({ ...d, [a.label]: a })); setEditingLabel(null) }} className="btn-wiki btn-wiki-ghost">Annuler</button>
+                        <button
+                          onClick={() => { setDrafts((d) => ({ ...d, [a.label]: a })); setEditingLabel(null); setConflicts((c) => ({ ...c, [a.label]: false })) }}
+                          className="btn-wiki btn-wiki-ghost"
+                        >Annuler</button>
                         <button onClick={() => handleSave(a.label)} disabled={saving} className="btn-wiki btn-wiki-primary disabled:opacity-60">
                           {saving ? '…' : '✓ Sauvegarder'}
                         </button>
@@ -156,6 +182,16 @@ export function AnnexesClient({ annexes: initial, isLoggedIn }: Props) {
                   </div>
                 )}
               </div>
+
+              {isEditing && hasConflict && (
+                <div className="mb-4">
+                  <ConflictBanner
+                    saving={saving}
+                    onForce={() => handleForceSave(a.label)}
+                    onCancel={() => { setDrafts((d) => ({ ...d, [a.label]: a })); setEditingLabel(null); setConflicts((c) => ({ ...c, [a.label]: false })); router.refresh() }}
+                  />
+                </div>
+              )}
 
               {isEditing ? (
                 <WikiEditor

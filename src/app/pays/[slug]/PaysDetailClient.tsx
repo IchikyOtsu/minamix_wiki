@@ -7,18 +7,22 @@ import type { Pays } from '@/data/pays'
 import { WikiEditor } from '@/components/WikiEditor'
 import { RichText } from '@/components/RichText'
 import { DeleteConfirm } from '@/components/DeleteConfirm'
+import { ConflictBanner } from '@/components/ConflictBanner'
 import { upsertPays, deletePays } from './actions'
 
 interface Props {
   pays: Pays
   allPays: Pays[]
   isLoggedIn: boolean
+  updatedAt: string | null
 }
 
-export function PaysDetailClient({ pays: initial, allPays, isLoggedIn }: Props) {
+export function PaysDetailClient({ pays: initial, allPays, isLoggedIn, updatedAt }: Props) {
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [conflict, setConflict] = useState(false)
   const [draft, setDraft] = useState<Pays>(initial)
+  const [loadedAt] = useState(updatedAt)
   const router = useRouter()
 
   function field(key: keyof Pays, label: string) {
@@ -37,9 +41,28 @@ export function PaysDetailClient({ pays: initial, allPays, isLoggedIn }: Props) 
 
   async function handleSave() {
     setSaving(true)
+    setConflict(false)
     try {
       const { slug, ...fields } = draft
-      await upsertPays(slug, fields)
+      await upsertPays(slug, fields, loadedAt)
+      setEditing(false)
+      router.refresh()
+    } catch (err) {
+      if (err instanceof Error && err.message === 'CONFLICT') {
+        setConflict(true)
+      } else {
+        alert('Erreur lors de la sauvegarde.')
+      }
+    }
+    setSaving(false)
+  }
+
+  async function handleForceSave() {
+    setSaving(true)
+    try {
+      const { slug, ...fields } = draft
+      await upsertPays(slug, fields, null)
+      setConflict(false)
       setEditing(false)
       router.refresh()
     } catch {
@@ -50,11 +73,17 @@ export function PaysDetailClient({ pays: initial, allPays, isLoggedIn }: Props) 
 
   return (
     <div>
-      {/* Edit bar */}
       {isLoggedIn && (
         <div className="wiki-edit-bar">
           {editing ? (
             <>
+              {conflict && (
+                <ConflictBanner
+                  saving={saving}
+                  onForce={handleForceSave}
+                  onCancel={() => { setConflict(false); setDraft(initial); setEditing(false); router.refresh() }}
+                />
+              )}
               <DeleteConfirm
                 label="Supprimer la page"
                 onConfirm={async () => {
@@ -63,7 +92,7 @@ export function PaysDetailClient({ pays: initial, allPays, isLoggedIn }: Props) 
                   router.refresh()
                 }}
               />
-              <button onClick={() => { setDraft(initial); setEditing(false) }} className="btn-wiki btn-wiki-ghost">
+              <button onClick={() => { setDraft(initial); setEditing(false); setConflict(false) }} className="btn-wiki btn-wiki-ghost">
                 Annuler
               </button>
               <button onClick={handleSave} disabled={saving} className="btn-wiki btn-wiki-primary disabled:opacity-60">
@@ -78,7 +107,6 @@ export function PaysDetailClient({ pays: initial, allPays, isLoggedIn }: Props) 
         </div>
       )}
 
-      {/* Header coloré */}
       <div className="rounded-2xl p-8 mb-8 text-white shadow-lg" style={{ backgroundColor: draft.couleur }}>
         {editing ? (
           <div className="space-y-3">
@@ -113,7 +141,6 @@ export function PaysDetailClient({ pays: initial, allPays, isLoggedIn }: Props) 
         )}
       </div>
 
-      {/* Sections */}
       <div className="space-y-5">
         {field('geographie', 'Géographie')}
         {field('histoire', 'Histoire')}
@@ -121,12 +148,10 @@ export function PaysDetailClient({ pays: initial, allPays, isLoggedIn }: Props) 
         {field('politiqueExterne', 'Politique externe')}
         {field('modeDeVie', 'Mode de vie')}
         {(draft.magie || editing) && field('magie', 'Magie')}
-
         {field('traditions', 'Traditions')}
         {field('societe', 'Société')}
       </div>
 
-      {/* Navigation entre pays */}
       <div className="mt-10 flex gap-3 flex-wrap">
         {allPays.filter((x) => x.slug !== draft.slug).map((other) => (
           <Link key={other.slug} href={`/pays/${other.slug}`} className="rounded-lg px-4 py-2 text-white text-sm shadow hover:shadow-md hover:-translate-y-0.5 transition-all" style={{ backgroundColor: other.couleur }}>

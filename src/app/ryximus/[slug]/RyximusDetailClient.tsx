@@ -7,18 +7,22 @@ import type { Ryximus } from '@/data/ryximus'
 import { WikiEditor } from '@/components/WikiEditor'
 import { RichText } from '@/components/RichText'
 import { DeleteConfirm } from '@/components/DeleteConfirm'
+import { ConflictBanner } from '@/components/ConflictBanner'
 import { upsertRyximus, deleteRyximus } from './actions'
 
 interface Props {
   ryximus: Ryximus
   allRyximus: Ryximus[]
   isLoggedIn: boolean
+  updatedAt: string | null
 }
 
-export function RyximusDetailClient({ ryximus: initial, allRyximus, isLoggedIn }: Props) {
+export function RyximusDetailClient({ ryximus: initial, allRyximus, isLoggedIn, updatedAt }: Props) {
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [conflict, setConflict] = useState(false)
   const [draft, setDraft] = useState<Ryximus>(initial)
+  const [loadedAt] = useState(updatedAt)
   const router = useRouter()
 
   function field(key: keyof Ryximus, label: string) {
@@ -37,9 +41,28 @@ export function RyximusDetailClient({ ryximus: initial, allRyximus, isLoggedIn }
 
   async function handleSave() {
     setSaving(true)
+    setConflict(false)
     try {
       const { slug, ...fields } = draft
-      await upsertRyximus(slug, fields)
+      await upsertRyximus(slug, fields, loadedAt)
+      setEditing(false)
+      router.refresh()
+    } catch (err) {
+      if (err instanceof Error && err.message === 'CONFLICT') {
+        setConflict(true)
+      } else {
+        alert('Erreur lors de la sauvegarde.')
+      }
+    }
+    setSaving(false)
+  }
+
+  async function handleForceSave() {
+    setSaving(true)
+    try {
+      const { slug, ...fields } = draft
+      await upsertRyximus(slug, fields, null)
+      setConflict(false)
       setEditing(false)
       router.refresh()
     } catch {
@@ -54,6 +77,13 @@ export function RyximusDetailClient({ ryximus: initial, allRyximus, isLoggedIn }
         <div className="wiki-edit-bar">
           {editing ? (
             <>
+              {conflict && (
+                <ConflictBanner
+                  saving={saving}
+                  onForce={handleForceSave}
+                  onCancel={() => { setConflict(false); setDraft(initial); setEditing(false); router.refresh() }}
+                />
+              )}
               <DeleteConfirm
                 label="Supprimer la page"
                 onConfirm={async () => {
@@ -62,7 +92,7 @@ export function RyximusDetailClient({ ryximus: initial, allRyximus, isLoggedIn }
                   router.refresh()
                 }}
               />
-              <button onClick={() => { setDraft(initial); setEditing(false) }} className="btn-wiki btn-wiki-ghost">Annuler</button>
+              <button onClick={() => { setDraft(initial); setEditing(false); setConflict(false) }} className="btn-wiki btn-wiki-ghost">Annuler</button>
               <button onClick={handleSave} disabled={saving} className="btn-wiki btn-wiki-primary disabled:opacity-60">
                 {saving ? 'Sauvegarde…' : '✓ Sauvegarder'}
               </button>
@@ -73,7 +103,6 @@ export function RyximusDetailClient({ ryximus: initial, allRyximus, isLoggedIn }
         </div>
       )}
 
-      {/* Header */}
       <div className="rounded-2xl p-8 mb-8 text-white shadow-lg" style={{ backgroundColor: draft.couleur }}>
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div>
@@ -113,7 +142,6 @@ export function RyximusDetailClient({ ryximus: initial, allRyximus, isLoggedIn }
             )}
           </div>
         </div>
-
       </div>
 
       <div className="space-y-5">

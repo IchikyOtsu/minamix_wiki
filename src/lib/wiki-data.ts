@@ -6,6 +6,7 @@ import { magie as staticMagie } from '@/data/magie'
 
 type MagieData = typeof staticMagie
 type AnnexeData = { label: string; titre: string; contenu: string }
+export type AnnexeWithTs = AnnexeData & { updatedAt: string | null }
 
 function isConfigured(): boolean {
   return !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
@@ -25,15 +26,23 @@ export async function getAllPays(): Promise<Pays[]> {
   }
 }
 
-export async function getPays(slug: string): Promise<Pays | null> {
-  if (!isConfigured()) return staticPays.find((p) => p.slug === slug) ?? null
+export async function getPays(slug: string): Promise<{ data: Pays | null; updatedAt: string | null }> {
+  if (!isConfigured()) {
+    const data = staticPays.find((p) => p.slug === slug) ?? null
+    return { data, updatedAt: null }
+  }
   try {
     const supabase = await createClient()
-    const { data } = await supabase.from('pays').select('slug, data').eq('slug', slug).single()
-    if (!data) return staticPays.find((p) => p.slug === slug) ?? null
-    return { slug: data.slug, ...(data.data as Omit<Pays, 'slug'>) }
+    const { data: row } = await supabase.from('pays').select('slug, data, updated_at').eq('slug', slug).single()
+    if (!row) {
+      return { data: staticPays.find((p) => p.slug === slug) ?? null, updatedAt: null }
+    }
+    return {
+      data: { slug: row.slug, ...(row.data as Omit<Pays, 'slug'>) },
+      updatedAt: row.updated_at ?? null,
+    }
   } catch {
-    return staticPays.find((p) => p.slug === slug) ?? null
+    return { data: staticPays.find((p) => p.slug === slug) ?? null, updatedAt: null }
   }
 }
 
@@ -51,15 +60,23 @@ export async function getAllRaces(): Promise<Race[]> {
   }
 }
 
-export async function getRace(slug: string): Promise<Race | null> {
-  if (!isConfigured()) return staticRaces.find((r) => r.slug === slug) ?? null
+export async function getRace(slug: string): Promise<{ data: Race | null; updatedAt: string | null }> {
+  if (!isConfigured()) {
+    const data = staticRaces.find((r) => r.slug === slug) ?? null
+    return { data, updatedAt: null }
+  }
   try {
     const supabase = await createClient()
-    const { data } = await supabase.from('races').select('slug, data').eq('slug', slug).single()
-    if (!data) return staticRaces.find((r) => r.slug === slug) ?? null
-    return { slug: data.slug, ...(data.data as Omit<Race, 'slug'>) }
+    const { data: row } = await supabase.from('races').select('slug, data, updated_at').eq('slug', slug).single()
+    if (!row) {
+      return { data: staticRaces.find((r) => r.slug === slug) ?? null, updatedAt: null }
+    }
+    return {
+      data: { slug: row.slug, ...(row.data as Omit<Race, 'slug'>) },
+      updatedAt: row.updated_at ?? null,
+    }
   } catch {
-    return staticRaces.find((r) => r.slug === slug) ?? null
+    return { data: staticRaces.find((r) => r.slug === slug) ?? null, updatedAt: null }
   }
 }
 
@@ -77,29 +94,37 @@ export async function getAllRyximus(): Promise<Ryximus[]> {
   }
 }
 
-export async function getRyximus(slug: string): Promise<Ryximus | null> {
-  if (!isConfigured()) return staticRyximus.find((r) => r.slug === slug) ?? null
+export async function getRyximus(slug: string): Promise<{ data: Ryximus | null; updatedAt: string | null }> {
+  if (!isConfigured()) {
+    const data = staticRyximus.find((r) => r.slug === slug) ?? null
+    return { data, updatedAt: null }
+  }
   try {
     const supabase = await createClient()
-    const { data } = await supabase.from('ryximus').select('slug, data').eq('slug', slug).single()
-    if (!data) return staticRyximus.find((r) => r.slug === slug) ?? null
-    return { slug: data.slug, ...(data.data as Omit<Ryximus, 'slug'>) }
+    const { data: row } = await supabase.from('ryximus').select('slug, data, updated_at').eq('slug', slug).single()
+    if (!row) {
+      return { data: staticRyximus.find((r) => r.slug === slug) ?? null, updatedAt: null }
+    }
+    return {
+      data: { slug: row.slug, ...(row.data as Omit<Ryximus, 'slug'>) },
+      updatedAt: row.updated_at ?? null,
+    }
   } catch {
-    return staticRyximus.find((r) => r.slug === slug) ?? null
+    return { data: staticRyximus.find((r) => r.slug === slug) ?? null, updatedAt: null }
   }
 }
 
 // ── Magie ─────────────────────────────────────────────────────────────────────
 
-export async function getMagie(): Promise<MagieData> {
-  if (!isConfigured()) return staticMagie
+export async function getMagie(): Promise<{ data: MagieData; updatedAt: string | null }> {
+  if (!isConfigured()) return { data: staticMagie, updatedAt: null }
   try {
     const supabase = await createClient()
-    const { data } = await supabase.from('magie').select('data').eq('id', 1).single()
-    if (!data?.data) return staticMagie
-    return data.data as MagieData
+    const { data: row } = await supabase.from('magie').select('data, updated_at').eq('id', 1).single()
+    if (!row?.data) return { data: staticMagie, updatedAt: null }
+    return { data: row.data as MagieData, updatedAt: row.updated_at ?? null }
   } catch {
-    return staticMagie
+    return { data: staticMagie, updatedAt: null }
   }
 }
 
@@ -107,19 +132,23 @@ export async function getMagie(): Promise<MagieData> {
 
 const DEFAULT_LABELS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
 
-export async function getAllAnnexes(): Promise<AnnexeData[]> {
+export async function getAllAnnexes(): Promise<AnnexeWithTs[]> {
   if (!isConfigured()) {
-    return DEFAULT_LABELS.map((label) => ({ label, titre: `Annexe ${label}`, contenu: '' }))
+    return DEFAULT_LABELS.map((label) => ({ label, titre: `Annexe ${label}`, contenu: '', updatedAt: null }))
   }
   try {
     const supabase = await createClient()
-    const { data } = await supabase.from('annexes').select('label, data')
+    const { data } = await supabase.from('annexes').select('label, data, updated_at')
     if (!data?.length) {
-      return DEFAULT_LABELS.map((label) => ({ label, titre: `Annexe ${label}`, contenu: '' }))
+      return DEFAULT_LABELS.map((label) => ({ label, titre: `Annexe ${label}`, contenu: '', updatedAt: null }))
     }
-    return data.map((row) => ({ label: row.label, ...(row.data as Omit<AnnexeData, 'label'>) }))
+    return data.map((row) => ({
+      label: row.label,
+      ...(row.data as Omit<AnnexeData, 'label'>),
+      updatedAt: row.updated_at ?? null,
+    }))
   } catch {
-    return DEFAULT_LABELS.map((label) => ({ label, titre: `Annexe ${label}`, contenu: '' }))
+    return DEFAULT_LABELS.map((label) => ({ label, titre: `Annexe ${label}`, contenu: '', updatedAt: null }))
   }
 }
 

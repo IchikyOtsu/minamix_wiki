@@ -4,6 +4,6 @@ import { MagieClient } from './MagieClient'
 export const metadata = { title: 'MINAMIX — La Magie' }
 
 export default async function MagiePage() {
-  const [data, user] = await Promise.all([getMagie(), getCurrentUser()])
-  return <MagieClient data={data} isLoggedIn={!!user} />
+  const [{ data, updatedAt }, user] = await Promise.all([getMagie(), getCurrentUser()])
+  return <MagieClient data={data} isLoggedIn={!!user} updatedAt={updatedAt} />
 }

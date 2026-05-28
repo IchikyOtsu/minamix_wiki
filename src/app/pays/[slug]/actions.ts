@@ -4,10 +4,17 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import type { Pays } from '@/data/pays'
 
-export async function upsertPays(slug: string, fields: Omit<Pays, 'slug'>) {
+export async function upsertPays(slug: string, fields: Omit<Pays, 'slug'>, loadedAt: string | null = null) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Non autorisé')
+
+  if (loadedAt) {
+    const { data: current } = await supabase.from('pays').select('updated_at').eq('slug', slug).maybeSingle()
+    if (current?.updated_at && current.updated_at !== loadedAt) {
+      throw new Error('CONFLICT')
+    }
+  }
 
   const { error } = await supabase
     .from('pays')
