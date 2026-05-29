@@ -12,7 +12,7 @@ import type { Block } from '@/types/blocks'
 
 type Section = { titre: string; contenu: string }
 type Affinite = { element: string; description: string }
-type MagieData = { intro: string; sections: Section[]; affinites: Affinite[]; blocks?: Block[] }
+type MagieData = { intro?: string; sections: Section[]; affinites: Affinite[]; blocks?: Block[] }
 
 interface Props {
   data: MagieData
@@ -84,15 +84,6 @@ export function MagieClient({ data: initial, isLoggedIn, updatedAt }: Props) {
       )}
 
       <h1 className="text-4xl font-bold mb-6" style={{ fontFamily: 'var(--font-heading)' }}>La Magie</h1>
-
-      {/* Intro */}
-      <div className="wiki-card p-8 mb-8">
-        {editing ? (
-          <WikiEditor content={draft.intro} onChange={(html) => setDraft((d) => ({ ...d, intro: html }))} />
-        ) : (
-          <p className="text-justify leading-relaxed text-lg italic" style={{ color: 'var(--ink)' }}>{draft.intro}</p>
-        )}
-      </div>
 
       {/* Sections */}
       <div className="space-y-6 mb-10">
