@@ -23,6 +23,7 @@ interface Props {
 export function MagieClient({ data: initial, isLoggedIn, updatedAt }: Props) {
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [conflict, setConflict] = useState(false)
   const [draft, setDraft] = useState<MagieData>(initial)
   const [loadedAt, setLoadedAt] = useState(updatedAt)
@@ -72,8 +73,8 @@ export function MagieClient({ data: initial, isLoggedIn, updatedAt }: Props) {
                 />
               )}
               <button onClick={() => { setDraft(initial); setEditing(false); setConflict(false) }} className="btn-wiki btn-wiki-ghost">Annuler</button>
-              <button onClick={handleSave} disabled={saving} className="btn-wiki btn-wiki-primary disabled:opacity-60">
-                {saving ? 'Sauvegarde…' : '✓ Sauvegarder'}
+              <button onClick={handleSave} disabled={saving || uploading} className="btn-wiki btn-wiki-primary disabled:opacity-60">
+                {saving ? 'Sauvegarde…' : uploading ? 'Upload en cours…' : '✓ Sauvegarder'}
               </button>
             </>
           ) : (
@@ -100,6 +101,32 @@ export function MagieClient({ data: initial, isLoggedIn, updatedAt }: Props) {
             {editing ? (
               <div className="space-y-2">
                 <div className="flex gap-2 items-center">
+                  <div className="flex flex-col gap-0.5 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => setDraft((d) => {
+                        if (i === 0) return d
+                        const sections = [...d.sections]
+                        ;[sections[i], sections[i - 1]] = [sections[i - 1], sections[i]]
+                        return { ...d, sections }
+                      })}
+                      disabled={i === 0}
+                      className="text-gray-400 hover:text-gray-700 disabled:opacity-25 text-xs leading-none px-1 py-0.5 hover:bg-gray-100 rounded"
+                      title="Monter"
+                    >▲</button>
+                    <button
+                      type="button"
+                      onClick={() => setDraft((d) => {
+                        if (i === d.sections.length - 1) return d
+                        const sections = [...d.sections]
+                        ;[sections[i], sections[i + 1]] = [sections[i + 1], sections[i]]
+                        return { ...d, sections }
+                      })}
+                      disabled={i === draft.sections.length - 1}
+                      className="text-gray-400 hover:text-gray-700 disabled:opacity-25 text-xs leading-none px-1 py-0.5 hover:bg-gray-100 rounded"
+                      title="Descendre"
+                    >▼</button>
+                  </div>
                   <input
                     value={s.titre}
                     onChange={(e) => setDraft((d) => {
@@ -197,6 +224,7 @@ export function MagieClient({ data: initial, isLoggedIn, updatedAt }: Props) {
         <BlockEditor
           blocks={draft.blocks ?? []}
           onChange={(blocks) => setDraft((d) => ({ ...d, blocks }))}
+          onUploading={setUploading}
         />
       ) : (
         <div className="space-y-5">

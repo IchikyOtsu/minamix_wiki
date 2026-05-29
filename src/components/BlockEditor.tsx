@@ -1,37 +1,44 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { WikiEditor } from './WikiEditor'
-import { createClient } from '@/lib/supabase/client'
+import { uploadImage } from '@/lib/uploadImage'
 import type { Block } from '@/types/blocks'
 
 interface Props {
   blocks: Block[]
   onChange: (blocks: Block[]) => void
+  onUploading?: (uploading: boolean) => void
 }
 
-export function BlockEditor({ blocks, onChange }: Props) {
+export function BlockEditor({ blocks, onChange, onUploading }: Props) {
   const [uploading, setUploading] = useState<Record<string, boolean>>({})
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({})
+  // Always-current ref so async callbacks never read stale closures
+  const blocksRef = useRef(blocks)
+  blocksRef.current = blocks
+
+  const isAnyUploading = Object.values(uploading).some(Boolean)
+  useEffect(() => { onUploading?.(isAnyUploading) }, [isAnyUploading, onUploading])
 
   function add(type: Block['type']) {
     const id = crypto.randomUUID()
     const contenu = type === 'list' ? '<ul><li></li></ul>' : ''
-    onChange([...blocks, { id, type, titre: '', contenu }])
+    onChange([...blocksRef.current, { id, type, titre: '', contenu }])
   }
 
   function remove(id: string) {
-    onChange(blocks.filter((b) => b.id !== id))
+    onChange(blocksRef.current.filter((b) => b.id !== id))
   }
 
   function update(id: string, patch: Partial<Block>) {
-    onChange(blocks.map((b) => (b.id === id ? { ...b, ...patch } : b)))
+    onChange(blocksRef.current.map((b) => (b.id === id ? { ...b, ...patch } : b)))
   }
 
   function move(i: number, dir: -1 | 1) {
     const j = i + dir
-    if (j < 0 || j >= blocks.length) return
-    const next = [...blocks]
+    if (j < 0 || j >= blocksRef.current.length) return
+    const next = [...blocksRef.current]
     ;[next[i], next[j]] = [next[j], next[i]]
     onChange(next)
   }
@@ -39,13 +46,13 @@ export function BlockEditor({ blocks, onChange }: Props) {
   async function handleImageUpload(blockId: string, file: File) {
     setUploading((u) => ({ ...u, [blockId]: true }))
     try {
-      const supabase = createClient()
-      const ext = file.name.split('.').pop() ?? 'jpg'
-      const path = `${crypto.randomUUID()}.${ext}`
-      const { error } = await supabase.storage.from('images').upload(path, file, { upsert: false })
-      if (error) { alert('Erreur upload : ' + error.message); return }
-      const { data } = supabase.storage.from('images').getPublicUrl(path)
-      update(blockId, { contenu: data.publicUrl })
+      const fd = new FormData()
+      fd.append('file', file)
+      const result = await uploadImage(fd)
+      if (!result.ok) { alert('Erreur upload : ' + result.error); return }
+      update(blockId, { contenu: result.url })
+    } catch (e) {
+      alert('Erreur upload : ' + (e instanceof Error ? e.message : String(e)))
     } finally {
       setUploading((u) => ({ ...u, [blockId]: false }))
     }

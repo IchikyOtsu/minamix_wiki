@@ -20,6 +20,7 @@ interface Props {
 export function PaysDetailClient({ pays: initial, allPays, isLoggedIn, updatedAt }: Props) {
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [conflict, setConflict] = useState(false)
   const [draft, setDraft] = useState<Pays>(initial)
   const [loadedAt, setLoadedAt] = useState(updatedAt)
@@ -81,8 +82,8 @@ export function PaysDetailClient({ pays: initial, allPays, isLoggedIn, updatedAt
               <button onClick={() => { setDraft(initial); setEditing(false); setConflict(false) }} className="btn-wiki btn-wiki-ghost">
                 Annuler
               </button>
-              <button onClick={handleSave} disabled={saving} className="btn-wiki btn-wiki-primary disabled:opacity-60">
-                {saving ? 'Sauvegarde…' : '✓ Sauvegarder'}
+              <button onClick={handleSave} disabled={saving || uploading} className="btn-wiki btn-wiki-primary disabled:opacity-60">
+                {saving ? 'Sauvegarde…' : uploading ? 'Upload en cours…' : '✓ Sauvegarder'}
               </button>
             </>
           ) : (
@@ -131,6 +132,7 @@ export function PaysDetailClient({ pays: initial, allPays, isLoggedIn, updatedAt
         <BlockEditor
           blocks={draft.blocks}
           onChange={(blocks) => setDraft((d) => ({ ...d, blocks }))}
+          onUploading={setUploading}
         />
       ) : (
         <div className="space-y-5">

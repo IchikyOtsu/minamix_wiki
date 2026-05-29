@@ -22,6 +22,7 @@ interface Props {
 export function RyximusDetailClient({ ryximus: initial, allRyximus, isLoggedIn, updatedAt }: Props) {
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [conflict, setConflict] = useState(false)
   const [draft, setDraft] = useState<Ryximus>(initial)
   const [loadedAt, setLoadedAt] = useState(updatedAt)
@@ -81,8 +82,8 @@ export function RyximusDetailClient({ ryximus: initial, allRyximus, isLoggedIn, 
                 }}
               />
               <button onClick={() => { setDraft(initial); setEditing(false); setConflict(false) }} className="btn-wiki btn-wiki-ghost">Annuler</button>
-              <button onClick={handleSave} disabled={saving} className="btn-wiki btn-wiki-primary disabled:opacity-60">
-                {saving ? 'Sauvegarde…' : '✓ Sauvegarder'}
+              <button onClick={handleSave} disabled={saving || uploading} className="btn-wiki btn-wiki-primary disabled:opacity-60">
+                {saving ? 'Sauvegarde…' : uploading ? 'Upload en cours…' : '✓ Sauvegarder'}
               </button>
             </>
           ) : (
@@ -154,10 +155,18 @@ export function RyximusDetailClient({ ryximus: initial, allRyximus, isLoggedIn, 
         </div>
 
         {/* Extra blocks */}
+        {editing && (
+          <div className="flex items-center gap-3 pt-2">
+            <div className="flex-1 h-px bg-gray-200" />
+            <span className="text-xs text-gray-400 font-medium shrink-0">Blocs supplémentaires</span>
+            <div className="flex-1 h-px bg-gray-200" />
+          </div>
+        )}
         {editing ? (
           <BlockEditor
             blocks={draft.blocks ?? []}
             onChange={(blocks) => setDraft((d) => ({ ...d, blocks }))}
+            onUploading={setUploading}
           />
         ) : (
           (draft.blocks ?? []).map((b) => <BlockView key={b.id} block={b} />)
