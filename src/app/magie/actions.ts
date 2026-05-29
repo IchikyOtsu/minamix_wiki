@@ -3,9 +3,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
+import type { Block } from '@/types/blocks'
+
 type MagieSection = { titre: string; contenu: string }
 type MagieAffinite = { element: string; description: string }
-type MagieFields = { intro: string; sections: MagieSection[]; affinites: MagieAffinite[] }
+type MagieFields = { intro: string; sections: MagieSection[]; affinites: MagieAffinite[]; blocks?: Block[] }
 type SaveResult = { ok: true; updatedAt: string } | { ok: false; conflict: boolean; error?: string }
 
 export async function upsertMagie(fields: MagieFields, loadedAt: string | null = null): Promise<SaveResult> {

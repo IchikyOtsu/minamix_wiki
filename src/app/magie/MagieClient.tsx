@@ -4,12 +4,15 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { WikiEditor } from '@/components/WikiEditor'
 import { RichText } from '@/components/RichText'
+import { BlockEditor } from '@/components/BlockEditor'
+import { BlockView } from '@/components/BlockView'
 import { ConflictBanner } from '@/components/ConflictBanner'
 import { upsertMagie } from './actions'
+import type { Block } from '@/types/blocks'
 
 type Section = { titre: string; contenu: string }
 type Affinite = { element: string; description: string }
-type MagieData = { intro: string; sections: Section[]; affinites: Affinite[] }
+type MagieData = { intro: string; sections: Section[]; affinites: Affinite[]; blocks?: Block[] }
 
 interface Props {
   data: MagieData
@@ -142,7 +145,7 @@ export function MagieClient({ data: initial, isLoggedIn, updatedAt }: Props) {
       </div>
 
       {/* Affinités */}
-      <div className="wiki-card p-6">
+      <div className="wiki-card p-6 mb-8">
         <h2 className="wiki-section-title">Affinités Élémentaires</h2>
         {editing ? (
           <div className="space-y-2">
@@ -188,6 +191,18 @@ export function MagieClient({ data: initial, isLoggedIn, updatedAt }: Props) {
           </div>
         )}
       </div>
+
+      {/* Blocs libres */}
+      {editing ? (
+        <BlockEditor
+          blocks={draft.blocks ?? []}
+          onChange={(blocks) => setDraft((d) => ({ ...d, blocks }))}
+        />
+      ) : (
+        <div className="space-y-5">
+          {(draft.blocks ?? []).map((b) => <BlockView key={b.id} block={b} />)}
+        </div>
+      )}
     </div>
   )
 }

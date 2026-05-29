@@ -4,7 +4,9 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { WikiEditor } from '@/components/WikiEditor'
+import { BlockEditor } from '@/components/BlockEditor'
 import { upsertRyximus } from '@/app/ryximus/[slug]/actions'
+import type { Block } from '@/types/blocks'
 
 function toSlug(s: string) {
   return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
@@ -19,6 +21,7 @@ export default function NouveauRyximusPage() {
   const [element, setElement] = useState('')
   const [personnalite, setPersonnalite] = useState('')
   const [conditionPacte, setConditionPacte] = useState('')
+  const [blocks, setBlocks] = useState<Block[]>([])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -26,7 +29,7 @@ export default function NouveauRyximusPage() {
     setSaving(true)
     const slug = toSlug(nom)
     try {
-      await upsertRyximus(slug, { nom, couleur, genre, element, image: '', personnalite, conditionPacte })
+      await upsertRyximus(slug, { nom, couleur, genre, element, image: '', personnalite, conditionPacte, blocks })
       router.push(`/ryximus/${slug}`)
       router.refresh()
     } catch {
@@ -70,15 +73,17 @@ export default function NouveauRyximusPage() {
           </div>
         </div>
 
-        {[
-          ['Personnalité', personnalite, setPersonnalite],
-          ['Condition du Pacte', conditionPacte, setConditionPacte],
-        ].map(([label, value, setter]) => (
-          <div key={label as string} className="bg-white rounded-xl shadow p-6">
-            <label className="block text-sm font-semibold mb-2">{label as string}</label>
-            <WikiEditor content={value as string} onChange={setter as (v: string) => void} />
-          </div>
-        ))}
+        <div className="bg-white rounded-xl shadow p-6">
+          <label className="block text-sm font-semibold mb-2">Personnalité</label>
+          <WikiEditor content={personnalite} onChange={setPersonnalite} />
+        </div>
+
+        <div className="bg-white rounded-xl shadow p-6">
+          <label className="block text-sm font-semibold mb-2">Condition du Pacte</label>
+          <WikiEditor content={conditionPacte} onChange={setConditionPacte} />
+        </div>
+
+        <BlockEditor blocks={blocks} onChange={setBlocks} />
 
         <div className="flex gap-3 justify-end">
           <Link href="/ryximus" className="px-5 py-2 bg-gray-200 rounded-lg text-sm hover:bg-gray-300 transition-colors">Annuler</Link>
