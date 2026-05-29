@@ -153,7 +153,7 @@ export async function renameImageFile(
     return { changed, result }
   }
 
-  const updates: Promise<unknown>[] = []
+  const updates: PromiseLike<unknown>[] = []
 
   for (const row of paysRes.data ?? []) {
     const d = row.data as Record<string, unknown>
