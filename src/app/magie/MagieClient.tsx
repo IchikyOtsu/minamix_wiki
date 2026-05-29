@@ -10,7 +10,7 @@ import type { Block } from '@/types/blocks'
 
 type Section = { titre: string; contenu: string }
 type Affinite = { element: string; description: string }
-type MagieData = { intro?: string; sections: Section[]; affinites: Affinite[]; blocks?: Block[] }
+type MagieData = { intro?: string; sections: Section[]; affinites: Affinite[]; blocks?: Block[]; isDraft?: boolean }
 
 interface Props {
   data: MagieData
