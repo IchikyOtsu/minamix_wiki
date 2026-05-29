@@ -4,7 +4,8 @@ import { getAllPays, getCurrentUser } from '@/lib/wiki-data'
 export const metadata = { title: 'MINAMIX — Les Pays' }
 
 export default async function PaysPage() {
-  const [pays, user] = await Promise.all([getAllPays(), getCurrentUser()])
+  const [allPays, user] = await Promise.all([getAllPays(), getCurrentUser()])
+  const pays = user ? allPays : allPays.filter(p => !p.isDraft)
 
   return (
     <div>
@@ -23,9 +24,12 @@ export default async function PaysPage() {
           <Link
             key={p.slug}
             href={`/pays/${p.slug}`}
-            className="rounded-lg p-7 text-white shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-200"
+            className="rounded-lg p-7 text-white shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-200 relative"
             style={{ backgroundColor: p.couleur, border: '1px solid rgba(0,0,0,0.12)' }}
           >
+            {user && p.isDraft && (
+              <span className="absolute top-3 right-3 text-xs bg-black/30 text-white rounded-full px-2.5 py-0.5 font-medium">Brouillon</span>
+            )}
             <h2 className="text-2xl font-bold mb-3 text-left" style={{ fontFamily: 'var(--font-heading)', letterSpacing: '0.08em' }}>{p.nom}</h2>
             <p className="text-sm leading-relaxed opacity-90" style={{ fontStyle: 'italic' }}>
               {p.blocks?.[0]?.contenu?.replace(/<[^>]+>/g, '').substring(0, 180) ?? ''}

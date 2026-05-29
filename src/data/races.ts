@@ -8,6 +8,7 @@ export interface Race {
   population: number
   esperanceVie: string
   blocks: Block[]
+  isDraft?: boolean
 }
 
 export const races: Race[] = [

@@ -5,6 +5,7 @@ export interface Pays {
   nom: string
   couleur: string
   blocks: Block[]
+  isDraft?: boolean
 }
 
 export const pays: Pays[] = [

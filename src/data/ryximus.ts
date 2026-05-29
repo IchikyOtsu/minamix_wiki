@@ -10,6 +10,7 @@ export interface Ryximus {
   personnalite: string;
   conditionPacte: string;
   blocks?: Block[];
+  isDraft?: boolean;
 }
 
 export const ryximus: Ryximus[] = [

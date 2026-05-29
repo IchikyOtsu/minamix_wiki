@@ -20,7 +20,8 @@ function makeBlock(titre: string, contenu: unknown, type: Block['type'] = 'text'
 
 function migratePaysData(slug: string, data: unknown): Pays {
   const d = data as Record<string, unknown>
-  if (Array.isArray(d.blocks)) return { slug, nom: String(d.nom ?? ''), couleur: String(d.couleur ?? '#747474'), blocks: d.blocks as Block[] }
+  const isDraft = d.isDraft === true
+  if (Array.isArray(d.blocks)) return { slug, nom: String(d.nom ?? ''), couleur: String(d.couleur ?? '#747474'), blocks: d.blocks as Block[], isDraft }
   const blocks: Block[] = [
     makeBlock('Géographie', d.geographie),
     makeBlock('Histoire', d.histoire),
@@ -31,11 +32,12 @@ function migratePaysData(slug: string, data: unknown): Pays {
     makeBlock('Société', d.societe),
     makeBlock('Magie', d.magie),
   ].filter((b): b is Block => b !== null)
-  return { slug, nom: String(d.nom ?? ''), couleur: String(d.couleur ?? '#747474'), blocks }
+  return { slug, nom: String(d.nom ?? ''), couleur: String(d.couleur ?? '#747474'), blocks, isDraft }
 }
 
 function migrateRaceData(slug: string, data: unknown): Race {
   const d = data as Record<string, unknown>
+  const isDraft = d.isDraft === true
   if (Array.isArray(d.blocks)) {
     return {
       slug,
@@ -45,6 +47,7 @@ function migrateRaceData(slug: string, data: unknown): Race {
       population: Number(d.population ?? 0),
       esperanceVie: String(d.esperanceVie ?? ''),
       blocks: d.blocks as Block[],
+      isDraft,
     }
   }
   const blocks: Block[] = [
@@ -62,6 +65,7 @@ function migrateRaceData(slug: string, data: unknown): Race {
     population: Number(d.population ?? 0),
     esperanceVie: String(d.esperanceVie ?? ''),
     blocks,
+    isDraft,
   }
 }
 

@@ -4,7 +4,8 @@ import { getAllRaces, getCurrentUser } from '@/lib/wiki-data'
 export const metadata = { title: 'MINAMIX — Les Races' }
 
 export default async function RacesPage() {
-  const [races, user] = await Promise.all([getAllRaces(), getCurrentUser()])
+  const [allRaces, user] = await Promise.all([getAllRaces(), getCurrentUser()])
+  const races = user ? allRaces : allRaces.filter(r => !r.isDraft)
 
   return (
     <div>
@@ -23,9 +24,12 @@ export default async function RacesPage() {
           <Link
             key={r.slug}
             href={`/races/${r.slug}`}
-            className="rounded-lg p-7 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-200"
+            className="rounded-lg p-7 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-200 relative"
             style={{ backgroundColor: r.couleur, border: '1px solid rgba(0,0,0,0.10)' }}
           >
+            {user && r.isDraft && (
+              <span className="absolute top-3 right-3 text-xs bg-black/30 text-white rounded-full px-2.5 py-0.5 font-medium">Brouillon</span>
+            )}
             <div className="flex justify-between items-start mb-3 gap-3">
               <h2 className="text-xl font-bold text-left" style={{ fontFamily: 'var(--font-heading)' }}>{r.nom}</h2>
               <span className="shrink-0 text-xs bg-white/60 rounded-full px-3 py-1 font-medium" style={{ fontFamily: 'var(--font-heading)', fontSize: '0.7rem' }}>
