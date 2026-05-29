@@ -11,7 +11,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function PaysDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
   const [{ data: p, updatedAt }, allPays, user] = await Promise.all([getPays(slug), getAllPays(), getCurrentUser()])
-  if (!p) notFound()
+  if (!p || (p.isDraft && !user)) notFound()
 
   return <PaysDetailClient pays={p} allPays={allPays} isLoggedIn={!!user} updatedAt={updatedAt} />
 }

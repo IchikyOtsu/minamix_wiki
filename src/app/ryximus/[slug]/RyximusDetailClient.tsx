@@ -92,6 +92,9 @@ export function RyximusDetailClient({ ryximus: initial, allRyximus, isLoggedIn, 
                 }}
               />
               <button onClick={() => { setDraft({ ...initial, blocks: initBlocks(initial) }); setEditing(false); setConflict(false) }} className="btn-wiki btn-wiki-ghost">Annuler</button>
+              <button type="button" onClick={() => setDraft(d => ({ ...d, isDraft: !d.isDraft }))} className={`btn-wiki btn-wiki-ghost ${draft.isDraft ? 'border-amber-300 text-amber-700 hover:bg-amber-50' : ''}`}>
+                {draft.isDraft ? '⚠️ Brouillon' : '◎ Publié'}
+              </button>
               <button onClick={handleSave} disabled={saving || uploading} className="btn-wiki btn-wiki-primary disabled:opacity-60">
                 {saving ? 'Sauvegarde…' : uploading ? 'Upload en cours…' : '✓ Sauvegarder'}
               </button>
@@ -99,6 +102,12 @@ export function RyximusDetailClient({ ryximus: initial, allRyximus, isLoggedIn, 
           ) : (
             <button onClick={() => setEditing(true)} className="btn-wiki btn-wiki-primary">✏️ Modifier cette page</button>
           )}
+        </div>
+      )}
+
+      {isLoggedIn && draft.isDraft && (
+        <div className="mb-6 p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-sm flex items-center gap-2">
+          <span>⚠️</span><span>Cette page est en brouillon — invisible aux visiteurs non connectés.</span>
         </div>
       )}
 

@@ -11,7 +11,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function RyximusDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
   const [{ data: r, updatedAt }, allRyximus, user] = await Promise.all([getRyximus(slug), getAllRyximus(), getCurrentUser()])
-  if (!r) notFound()
+  if (!r || (r.isDraft && !user)) notFound()
 
   return <RyximusDetailClient ryximus={r} allRyximus={allRyximus} isLoggedIn={!!user} updatedAt={updatedAt} />
 }

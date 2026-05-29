@@ -4,7 +4,8 @@ import { getAllRyximus, getCurrentUser } from '@/lib/wiki-data'
 export const metadata = { title: 'MINAMIX — Les Ryximus' }
 
 export default async function RyximusPage() {
-  const [ryximus, user] = await Promise.all([getAllRyximus(), getCurrentUser()])
+  const [allRyximus, user] = await Promise.all([getAllRyximus(), getCurrentUser()])
+  const ryximus = user ? allRyximus : allRyximus.filter(r => !r.isDraft)
 
   return (
     <div>
@@ -23,17 +24,18 @@ export default async function RyximusPage() {
           <Link
             key={r.slug}
             href={`/ryximus/${r.slug}`}
-            className="rounded-lg p-7 text-white shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-200"
+            className="rounded-lg p-7 text-white shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-200 relative"
             style={{ backgroundColor: r.couleur, border: '1px solid rgba(0,0,0,0.15)' }}
           >
+            {user && r.isDraft && (
+              <span className="absolute top-3 right-3 text-xs bg-black/30 text-white rounded-full px-2.5 py-0.5 font-medium">Brouillon</span>
+            )}
             <div className="flex items-start justify-between gap-3 mb-3">
               <h2 className="text-2xl font-bold text-left" style={{ fontFamily: 'var(--font-heading)' }}>{r.nom}</h2>
-              <span className="shrink-0 text-xs bg-white/20 border border-white/30 rounded-full px-3 py-1 mt-1">
-                {r.element}
-              </span>
+              <span className="shrink-0 text-xs bg-white/20 border border-white/30 rounded-full px-3 py-1 mt-1">{r.element}</span>
             </div>
             <p className="text-sm opacity-80 leading-relaxed">
-              {r.personnalite?.replace(/<[^>]+>/g, '').substring(0, 120)}…
+              {r.blocks?.[0]?.contenu?.replace(/<[^>]+>/g, '').substring(0, 120) ?? r.personnalite?.replace(/<[^>]+>/g, '').substring(0, 120) ?? ''}…
             </p>
             <p className="text-xs opacity-55 mt-3" style={{ fontFamily: 'var(--font-heading)', letterSpacing: '0.06em' }}>{r.genre}</p>
           </Link>

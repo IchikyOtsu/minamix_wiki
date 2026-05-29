@@ -11,7 +11,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function RaceDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
   const [{ data: r, updatedAt }, allRaces, user] = await Promise.all([getRace(slug), getAllRaces(), getCurrentUser()])
-  if (!r) notFound()
+  if (!r || (r.isDraft && !user)) notFound()
 
   return <RaceDetailClient race={r} allRaces={allRaces} isLoggedIn={!!user} updatedAt={updatedAt} />
 }
