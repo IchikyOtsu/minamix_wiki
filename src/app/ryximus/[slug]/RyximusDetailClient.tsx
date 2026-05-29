@@ -1,16 +1,21 @@
 'use client'
 
 import { useState } from 'react'
+import dynamic from 'next/dynamic'
 import { TableOfContents } from '@/components/TableOfContents'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import type { Ryximus } from '@/data/ryximus'
-import { BlockEditor } from '@/components/BlockEditor'
 import { BlockView } from '@/components/BlockView'
 import { DeleteConfirm } from '@/components/DeleteConfirm'
 import { ConflictBanner } from '@/components/ConflictBanner'
 import { upsertRyximus, deleteRyximus } from './actions'
 import type { Block } from '@/types/blocks'
+
+const BlockEditor = dynamic(
+  () => import('@/components/BlockEditor').then(m => ({ default: m.BlockEditor })),
+  { ssr: false, loading: () => <div className="space-y-3 animate-pulse"><div className="h-44 bg-gray-100 rounded-xl" /><div className="h-12 bg-gray-100 rounded-xl" /></div> }
+) as React.ComponentType<{ blocks: Block[]; onChange: (b: Block[]) => void; onUploading?: (u: boolean) => void }>
 
 interface Props {
   ryximus: Ryximus

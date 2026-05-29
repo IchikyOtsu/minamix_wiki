@@ -2,9 +2,14 @@
 
 import Link from 'next/link'
 import { useState, useCallback } from 'react'
+import dynamic from 'next/dynamic'
 import { useRouter, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { SearchModal } from './SearchModal'
+
+const SearchModal = dynamic(
+  () => import('./SearchModal').then(m => ({ default: m.SearchModal })),
+  { ssr: false }
+)
 
 interface NavLink { label: string; href: string }
 
