@@ -4,13 +4,12 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import type { Ryximus } from '@/data/ryximus'
-import { WikiEditor } from '@/components/WikiEditor'
 import { BlockEditor } from '@/components/BlockEditor'
 import { BlockView } from '@/components/BlockView'
-import { RichText } from '@/components/RichText'
 import { DeleteConfirm } from '@/components/DeleteConfirm'
 import { ConflictBanner } from '@/components/ConflictBanner'
 import { upsertRyximus, deleteRyximus } from './actions'
+import type { Block } from '@/types/blocks'
 
 interface Props {
   ryximus: Ryximus
@@ -19,12 +18,23 @@ interface Props {
   updatedAt: string | null
 }
 
+function initBlocks(r: Ryximus): Block[] {
+  if (r.blocks?.length) return r.blocks
+  // Migrate legacy fields to blocks on first edit
+  const blocks: Block[] = []
+  if (r.personnalite?.trim())
+    blocks.push({ id: crypto.randomUUID(), type: 'text', titre: 'Personnalité', contenu: r.personnalite })
+  if (r.conditionPacte?.trim())
+    blocks.push({ id: crypto.randomUUID(), type: 'text', titre: 'Condition du Pacte', contenu: r.conditionPacte })
+  return blocks
+}
+
 export function RyximusDetailClient({ ryximus: initial, allRyximus, isLoggedIn, updatedAt }: Props) {
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [conflict, setConflict] = useState(false)
-  const [draft, setDraft] = useState<Ryximus>(initial)
+  const [draft, setDraft] = useState<Ryximus>({ ...initial, blocks: initBlocks(initial) })
   const [loadedAt, setLoadedAt] = useState(updatedAt)
   const router = useRouter()
 
@@ -70,7 +80,7 @@ export function RyximusDetailClient({ ryximus: initial, allRyximus, isLoggedIn, 
                 <ConflictBanner
                   saving={saving}
                   onForce={handleForceSave}
-                  onCancel={() => { setConflict(false); setDraft(initial); setEditing(false); router.refresh() }}
+                  onCancel={() => { setConflict(false); setDraft({ ...initial, blocks: initBlocks(initial) }); setEditing(false); router.refresh() }}
                 />
               )}
               <DeleteConfirm
@@ -81,7 +91,7 @@ export function RyximusDetailClient({ ryximus: initial, allRyximus, isLoggedIn, 
                   router.refresh()
                 }}
               />
-              <button onClick={() => { setDraft(initial); setEditing(false); setConflict(false) }} className="btn-wiki btn-wiki-ghost">Annuler</button>
+              <button onClick={() => { setDraft({ ...initial, blocks: initBlocks(initial) }); setEditing(false); setConflict(false) }} className="btn-wiki btn-wiki-ghost">Annuler</button>
               <button onClick={handleSave} disabled={saving || uploading} className="btn-wiki btn-wiki-primary disabled:opacity-60">
                 {saving ? 'Sauvegarde…' : uploading ? 'Upload en cours…' : '✓ Sauvegarder'}
               </button>
@@ -92,6 +102,7 @@ export function RyximusDetailClient({ ryximus: initial, allRyximus, isLoggedIn, 
         </div>
       )}
 
+      {/* Header */}
       <div className="rounded-2xl p-8 mb-8 text-white shadow-lg" style={{ backgroundColor: draft.couleur }}>
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div>
@@ -133,45 +144,21 @@ export function RyximusDetailClient({ ryximus: initial, allRyximus, isLoggedIn, 
         </div>
       </div>
 
-      <div className="space-y-5">
-        {/* Personnalité */}
-        <div className="wiki-card p-6">
-          <h3 className="wiki-section-title">Personnalité</h3>
-          {editing ? (
-            <WikiEditor content={draft.personnalite} onChange={(html) => setDraft((d) => ({ ...d, personnalite: html }))} />
-          ) : (
-            <RichText content={draft.personnalite} />
+      {/* All content via blocks */}
+      {editing ? (
+        <BlockEditor
+          blocks={draft.blocks ?? []}
+          onChange={(blocks) => setDraft((d) => ({ ...d, blocks }))}
+          onUploading={setUploading}
+        />
+      ) : (
+        <div className="space-y-5">
+          {(draft.blocks ?? []).map((b) => <BlockView key={b.id} block={b} />)}
+          {(draft.blocks ?? []).length === 0 && isLoggedIn && (
+            <p className="text-gray-400 italic text-sm text-center py-8">Aucun contenu. Clique sur Modifier pour ajouter des blocs.</p>
           )}
         </div>
-
-        {/* Condition du Pacte */}
-        <div className="wiki-card p-6 border-l-4" style={{ borderColor: draft.couleur }}>
-          <h3 className="wiki-section-title">Condition du Pacte</h3>
-          {editing ? (
-            <WikiEditor content={draft.conditionPacte} onChange={(html) => setDraft((d) => ({ ...d, conditionPacte: html }))} />
-          ) : (
-            <RichText content={draft.conditionPacte} />
-          )}
-        </div>
-
-        {/* Extra blocks */}
-        {editing && (
-          <div className="flex items-center gap-3 pt-2">
-            <div className="flex-1 h-px bg-gray-200" />
-            <span className="text-xs text-gray-400 font-medium shrink-0">Blocs supplémentaires</span>
-            <div className="flex-1 h-px bg-gray-200" />
-          </div>
-        )}
-        {editing ? (
-          <BlockEditor
-            blocks={draft.blocks ?? []}
-            onChange={(blocks) => setDraft((d) => ({ ...d, blocks }))}
-            onUploading={setUploading}
-          />
-        ) : (
-          (draft.blocks ?? []).map((b) => <BlockView key={b.id} block={b} />)
-        )}
-      </div>
+      )}
 
       <div className="mt-10 flex gap-3 flex-wrap">
         {allRyximus.filter((x) => x.slug !== draft.slug).map((other) => (

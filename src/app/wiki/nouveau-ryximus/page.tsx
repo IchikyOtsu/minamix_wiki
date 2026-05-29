@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { WikiEditor } from '@/components/WikiEditor'
 import { BlockEditor } from '@/components/BlockEditor'
 import { upsertRyximus } from '@/app/ryximus/[slug]/actions'
 import type { Block } from '@/types/blocks'
@@ -12,16 +11,20 @@ function toSlug(s: string) {
   return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 }
 
+const DEFAULT_BLOCKS: Block[] = [
+  { id: crypto.randomUUID(), type: 'text', titre: 'Personnalité', contenu: '' },
+  { id: crypto.randomUUID(), type: 'text', titre: 'Condition du Pacte', contenu: '' },
+]
+
 export default function NouveauRyximusPage() {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [nom, setNom] = useState('')
   const [couleur, setCouleur] = useState('#747474')
   const [genre, setGenre] = useState<'Masculin' | 'Féminin'>('Masculin')
   const [element, setElement] = useState('')
-  const [personnalite, setPersonnalite] = useState('')
-  const [conditionPacte, setConditionPacte] = useState('')
-  const [blocks, setBlocks] = useState<Block[]>([])
+  const [blocks, setBlocks] = useState<Block[]>(DEFAULT_BLOCKS)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -29,7 +32,7 @@ export default function NouveauRyximusPage() {
     setSaving(true)
     const slug = toSlug(nom)
     try {
-      await upsertRyximus(slug, { nom, couleur, genre, element, image: '', personnalite, conditionPacte, blocks })
+      await upsertRyximus(slug, { nom, couleur, genre, element, image: '', personnalite: '', conditionPacte: '', blocks })
       router.push(`/ryximus/${slug}`)
       router.refresh()
     } catch {
@@ -73,22 +76,12 @@ export default function NouveauRyximusPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow p-6">
-          <label className="block text-sm font-semibold mb-2">Personnalité</label>
-          <WikiEditor content={personnalite} onChange={setPersonnalite} />
-        </div>
-
-        <div className="bg-white rounded-xl shadow p-6">
-          <label className="block text-sm font-semibold mb-2">Condition du Pacte</label>
-          <WikiEditor content={conditionPacte} onChange={setConditionPacte} />
-        </div>
-
-        <BlockEditor blocks={blocks} onChange={setBlocks} />
+        <BlockEditor blocks={blocks} onChange={setBlocks} onUploading={setUploading} />
 
         <div className="flex gap-3 justify-end">
           <Link href="/ryximus" className="px-5 py-2 bg-gray-200 rounded-lg text-sm hover:bg-gray-300 transition-colors">Annuler</Link>
-          <button type="submit" disabled={saving || !nom.trim()} className="px-5 py-2 bg-[#747474] text-white rounded-lg text-sm hover:bg-[#5a5a5a] disabled:opacity-60 transition-colors">
-            {saving ? 'Création…' : 'Créer le Ryximus'}
+          <button type="submit" disabled={saving || uploading || !nom.trim()} className="px-5 py-2 bg-[#747474] text-white rounded-lg text-sm hover:bg-[#5a5a5a] disabled:opacity-60 transition-colors">
+            {saving ? 'Création…' : uploading ? 'Upload en cours…' : 'Créer le Ryximus'}
           </button>
         </div>
       </form>

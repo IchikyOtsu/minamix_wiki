@@ -2,8 +2,6 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { WikiEditor } from '@/components/WikiEditor'
-import { RichText } from '@/components/RichText'
 import { BlockEditor } from '@/components/BlockEditor'
 import { BlockView } from '@/components/BlockView'
 import { ConflictBanner } from '@/components/ConflictBanner'
@@ -20,12 +18,20 @@ interface Props {
   updatedAt: string | null
 }
 
+function initBlocks(data: MagieData): Block[] {
+  if (data.blocks?.length) return data.blocks
+  // Migrate legacy sections to blocks on first load
+  return (data.sections ?? [])
+    .filter((s) => s.titre || s.contenu)
+    .map((s) => ({ id: crypto.randomUUID(), type: 'text' as const, titre: s.titre, contenu: s.contenu }))
+}
+
 export function MagieClient({ data: initial, isLoggedIn, updatedAt }: Props) {
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [conflict, setConflict] = useState(false)
-  const [draft, setDraft] = useState<MagieData>(initial)
+  const [draft, setDraft] = useState<MagieData>({ ...initial, blocks: initBlocks(initial) })
   const [loadedAt, setLoadedAt] = useState(updatedAt)
   const router = useRouter()
 
@@ -69,10 +75,10 @@ export function MagieClient({ data: initial, isLoggedIn, updatedAt }: Props) {
                 <ConflictBanner
                   saving={saving}
                   onForce={handleForceSave}
-                  onCancel={() => { setConflict(false); setDraft(initial); setEditing(false); router.refresh() }}
+                  onCancel={() => { setConflict(false); setDraft({ ...initial, blocks: initBlocks(initial) }); setEditing(false); router.refresh() }}
                 />
               )}
-              <button onClick={() => { setDraft(initial); setEditing(false); setConflict(false) }} className="btn-wiki btn-wiki-ghost">Annuler</button>
+              <button onClick={() => { setDraft({ ...initial, blocks: initBlocks(initial) }); setEditing(false); setConflict(false) }} className="btn-wiki btn-wiki-ghost">Annuler</button>
               <button onClick={handleSave} disabled={saving || uploading} className="btn-wiki btn-wiki-primary disabled:opacity-60">
                 {saving ? 'Sauvegarde…' : uploading ? 'Upload en cours…' : '✓ Sauvegarder'}
               </button>
@@ -85,132 +91,57 @@ export function MagieClient({ data: initial, isLoggedIn, updatedAt }: Props) {
 
       <h1 className="text-4xl font-bold mb-6" style={{ fontFamily: 'var(--font-heading)' }}>La Magie</h1>
 
-      {/* Sections */}
-      <div className="space-y-6 mb-10">
-        {draft.sections.map((s, i) => (
-          <div key={i} className="wiki-card p-6">
-            {editing ? (
-              <div className="space-y-2">
-                <div className="flex gap-2 items-center">
-                  <div className="flex flex-col gap-0.5 shrink-0">
-                    <button
-                      type="button"
-                      onClick={() => setDraft((d) => {
-                        if (i === 0) return d
-                        const sections = [...d.sections]
-                        ;[sections[i], sections[i - 1]] = [sections[i - 1], sections[i]]
-                        return { ...d, sections }
-                      })}
-                      disabled={i === 0}
-                      className="text-gray-400 hover:text-gray-700 disabled:opacity-25 text-xs leading-none px-1 py-0.5 hover:bg-gray-100 rounded"
-                      title="Monter"
-                    >▲</button>
-                    <button
-                      type="button"
-                      onClick={() => setDraft((d) => {
-                        if (i === d.sections.length - 1) return d
-                        const sections = [...d.sections]
-                        ;[sections[i], sections[i + 1]] = [sections[i + 1], sections[i]]
-                        return { ...d, sections }
-                      })}
-                      disabled={i === draft.sections.length - 1}
-                      className="text-gray-400 hover:text-gray-700 disabled:opacity-25 text-xs leading-none px-1 py-0.5 hover:bg-gray-100 rounded"
-                      title="Descendre"
-                    >▼</button>
-                  </div>
+      {/* Affinités Élémentaires — structured data, kept outside blocks */}
+      {(draft.affinites?.length > 0 || editing) && (
+        <div className="wiki-card p-6 mb-8">
+          <h2 className="wiki-section-title">Affinités Élémentaires</h2>
+          {editing ? (
+            <div className="space-y-2">
+              {draft.affinites.map((a, i) => (
+                <div key={i} className="flex gap-2 items-center">
                   <input
-                    value={s.titre}
+                    value={a.element}
                     onChange={(e) => setDraft((d) => {
-                      const sections = [...d.sections]
-                      sections[i] = { ...sections[i], titre: e.target.value }
-                      return { ...d, sections }
+                      const af = [...d.affinites]; af[i] = { ...af[i], element: e.target.value }; return { ...d, affinites: af }
                     })}
-                    className="flex-1 border border-gray-200 rounded-lg px-3 py-1.5 font-semibold text-lg focus:outline-none focus:border-blue-400"
-                    placeholder="Titre de la section"
+                    className="w-28 border border-gray-200 rounded-lg px-2 py-1.5 font-semibold text-sm focus:outline-none focus:border-blue-400"
+                    placeholder="Élément"
+                  />
+                  <input
+                    value={a.description}
+                    onChange={(e) => setDraft((d) => {
+                      const af = [...d.affinites]; af[i] = { ...af[i], description: e.target.value }; return { ...d, affinites: af }
+                    })}
+                    className="flex-1 border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:border-blue-400"
+                    placeholder="Description"
                   />
                   <button
                     type="button"
-                    onClick={() => setDraft((d) => ({ ...d, sections: d.sections.filter((_, j) => j !== i) }))}
+                    onClick={() => setDraft((d) => ({ ...d, affinites: d.affinites.filter((_, j) => j !== i) }))}
                     className="btn-wiki btn-wiki-ghost text-red-500 hover:text-red-700 hover:bg-red-50"
                   >×</button>
                 </div>
-                <WikiEditor
-                  content={s.contenu}
-                  onChange={(html) => setDraft((d) => {
-                    const sections = [...d.sections]
-                    sections[i] = { ...sections[i], contenu: html }
-                    return { ...d, sections }
-                  })}
-                />
-              </div>
-            ) : (
-              <>
-                <h3 className="wiki-section-title">{s.titre}</h3>
-                <RichText content={s.contenu} />
-              </>
-            )}
-          </div>
-        ))}
-        {editing && (
-          <button
-            type="button"
-            onClick={() => setDraft((d) => ({ ...d, sections: [...d.sections, { titre: '', contenu: '' }] }))}
-            className="w-full py-3 border-2 border-dashed border-gray-300 rounded-xl text-gray-500 hover:border-[var(--gold)] hover:text-gray-700 transition-colors text-sm font-medium"
-          >
-            + Ajouter une section
-          </button>
-        )}
-      </div>
+              ))}
+              <button
+                type="button"
+                onClick={() => setDraft((d) => ({ ...d, affinites: [...d.affinites, { element: '', description: '' }] }))}
+                className="btn-wiki btn-wiki-ghost text-sm mt-1"
+              >+ Ajouter une affinité</button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {draft.affinites.map((a) => (
+                <div key={a.element} className="rounded-xl p-4 text-center border-2 border-gray-100 hover:border-[var(--gold)] transition-colors">
+                  <div className="text-lg font-bold mb-1" style={{ fontFamily: 'var(--font-heading)' }}>{a.element}</div>
+                  {a.description && <div className="text-xs text-gray-600">{a.description}</div>}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
-      {/* Affinités */}
-      <div className="wiki-card p-6 mb-8">
-        <h2 className="wiki-section-title">Affinités Élémentaires</h2>
-        {editing ? (
-          <div className="space-y-2">
-            {draft.affinites.map((a, i) => (
-              <div key={i} className="flex gap-2 items-center">
-                <input
-                  value={a.element}
-                  onChange={(e) => setDraft((d) => {
-                    const af = [...d.affinites]; af[i] = { ...af[i], element: e.target.value }; return { ...d, affinites: af }
-                  })}
-                  className="w-28 border border-gray-200 rounded-lg px-2 py-1.5 font-semibold text-sm focus:outline-none focus:border-blue-400"
-                  placeholder="Élément"
-                />
-                <input
-                  value={a.description}
-                  onChange={(e) => setDraft((d) => {
-                    const af = [...d.affinites]; af[i] = { ...af[i], description: e.target.value }; return { ...d, affinites: af }
-                  })}
-                  className="flex-1 border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:border-blue-400"
-                  placeholder="Description"
-                />
-                <button
-                  type="button"
-                  onClick={() => setDraft((d) => ({ ...d, affinites: d.affinites.filter((_, j) => j !== i) }))}
-                  className="btn-wiki btn-wiki-ghost text-red-500 hover:text-red-700 hover:bg-red-50"
-                >×</button>
-              </div>
-            ))}
-            <button
-              type="button"
-              onClick={() => setDraft((d) => ({ ...d, affinites: [...d.affinites, { element: '', description: '' }] }))}
-              className="btn-wiki btn-wiki-ghost text-sm mt-1"
-            >+ Ajouter une affinité</button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {draft.affinites.map((a) => (
-              <div key={a.element} className="rounded-xl p-4 text-center border-2 border-gray-100 hover:border-[var(--gold)] transition-colors">
-                <div className="text-lg font-bold mb-1" style={{ fontFamily: 'var(--font-heading)' }}>{a.element}</div>
-                {a.description && <div className="text-xs text-gray-600">{a.description}</div>}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Blocs libres */}
+      {/* All content via blocks */}
       {editing ? (
         <BlockEditor
           blocks={draft.blocks ?? []}
@@ -220,6 +151,9 @@ export function MagieClient({ data: initial, isLoggedIn, updatedAt }: Props) {
       ) : (
         <div className="space-y-5">
           {(draft.blocks ?? []).map((b) => <BlockView key={b.id} block={b} />)}
+          {(draft.blocks ?? []).length === 0 && isLoggedIn && (
+            <p className="text-gray-400 italic text-sm text-center py-8">Aucun contenu. Clique sur Modifier pour ajouter des blocs.</p>
+          )}
         </div>
       )}
     </div>
