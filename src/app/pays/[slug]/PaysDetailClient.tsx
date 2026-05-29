@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { TableOfContents } from '@/components/TableOfContents'
 import type { Pays } from '@/data/pays'
 import { BlockEditor } from '@/components/BlockEditor'
 import { BlockView } from '@/components/BlockView'
@@ -151,6 +152,8 @@ export function PaysDetailClient({ pays: initial, allPays, isLoggedIn, updatedAt
           )}
         </div>
       )}
+
+      <TableOfContents blocks={draft.blocks} accentColor={draft.couleur} />
 
       <div className="mt-10 flex gap-3 flex-wrap">
         {allPays.filter((x) => x.slug !== draft.slug).map((other) => (

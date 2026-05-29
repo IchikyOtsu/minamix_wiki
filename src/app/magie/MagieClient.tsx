@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { TableOfContents } from '@/components/TableOfContents'
 import { useRouter } from 'next/navigation'
 import { BlockEditor } from '@/components/BlockEditor'
 import { BlockView } from '@/components/BlockView'
@@ -149,6 +150,8 @@ export function MagieClient({ data: initial, isLoggedIn, updatedAt }: Props) {
           )}
         </div>
       )}
+
+      <TableOfContents blocks={draft.blocks ?? []} />
 
       {/* All content via blocks */}
       {editing ? (

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { TableOfContents } from '@/components/TableOfContents'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import type { Ryximus } from '@/data/ryximus'
@@ -168,6 +169,8 @@ export function RyximusDetailClient({ ryximus: initial, allRyximus, isLoggedIn, 
           )}
         </div>
       )}
+
+      <TableOfContents blocks={draft.blocks ?? []} accentColor={draft.couleur} />
 
       <div className="mt-10 flex gap-3 flex-wrap">
         {allRyximus.filter((x) => x.slug !== draft.slug).map((other) => (
