@@ -81,6 +81,20 @@ export default function Navigation({ paysItems, racesItems, ryximusItems, isLogg
               )
             })}
 
+            {isLoggedIn && (
+              <li>
+                <Link
+                  href="/admin"
+                  className={`px-4 py-5 text-sm font-medium inline-block border-b-2 transition-all ${
+                    pathname.startsWith('/admin')
+                      ? 'text-white border-[#b08c2a]'
+                      : 'text-gray-300 hover:text-white border-transparent hover:border-white/40'
+                  }`}
+                >
+                  Admin
+                </Link>
+              </li>
+            )}
             <li className="ml-3 pl-3 border-l border-white/20">
               {isLoggedIn ? (
                 <button onClick={handleLogout} className="px-3 py-1.5 text-xs font-medium text-gray-300 hover:text-white border border-white/30 rounded-md hover:border-white/60 transition-all">
@@ -117,9 +131,12 @@ export default function Navigation({ paysItems, racesItems, ryximusItems, isLogg
                 ))}
               </div>
             ))}
-            <div className="px-4 pt-3 border-t border-white/10 mt-2">
+            <div className="px-4 pt-3 border-t border-white/10 mt-2 flex items-center justify-between">
               {isLoggedIn ? (
-                <button onClick={handleLogout} className="text-gray-300 text-sm hover:text-white">Déconnexion</button>
+                <div className="flex items-center gap-4">
+                  <Link href="/admin" className="text-gray-300 text-sm hover:text-white" onClick={() => setMobileOpen(false)}>Admin</Link>
+                  <button onClick={handleLogout} className="text-gray-300 text-sm hover:text-white">Déconnexion</button>
+                </div>
               ) : (
                 <Link href="/login" className="text-gray-300 text-sm hover:text-white" onClick={() => setMobileOpen(false)}>Connexion</Link>
               )}

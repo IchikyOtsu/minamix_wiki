@@ -1,8 +1,9 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { sanitizeName, sanitizeFilename } from '@/lib/sanitize'
 
-type UploadResult = { ok: true; url: string } | { ok: false; error: string }
+type UploadResult = { ok: true; url: string; name: string } | { ok: false; error: string }
 
 export async function uploadImage(formData: FormData): Promise<UploadResult> {
   const supabase = await createClient()
@@ -12,8 +13,14 @@ export async function uploadImage(formData: FormData): Promise<UploadResult> {
   const file = formData.get('file') as File | null
   if (!file) return { ok: false, error: 'Aucun fichier' }
 
-  const ext = file.name.split('.').pop() ?? 'jpg'
-  const path = `${crypto.randomUUID()}.${ext}`
+  const customBase = (formData.get('name') as string | null)?.trim()
+  const ext = '.' + (file.name.split('.').pop()?.toLowerCase() ?? 'jpg')
+
+  // User-chosen name: sanitize without suffix (they decided the name)
+  // Auto name: sanitize + random suffix to avoid collisions
+  const path = customBase
+    ? sanitizeName(customBase + ext)
+    : sanitizeFilename(file.name)
 
   const buffer = Buffer.from(await file.arrayBuffer())
 
@@ -24,5 +31,5 @@ export async function uploadImage(formData: FormData): Promise<UploadResult> {
   if (error) return { ok: false, error: error.message }
 
   const { data } = supabase.storage.from('images').getPublicUrl(path)
-  return { ok: true, url: data.publicUrl }
+  return { ok: true, url: data.publicUrl, name: path }
 }
