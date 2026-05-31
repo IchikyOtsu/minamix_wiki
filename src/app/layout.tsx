@@ -25,14 +25,16 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     getCurrentUser(),
   ])
 
+  const loggedIn = !!user
+
   return (
     <html lang="fr" className="h-full antialiased">
       <body className="min-h-full flex flex-col">
         <Navigation
-          paysItems={paysItems.map((p) => ({ label: p.nom, href: `/pays/${p.slug}` }))}
-          racesItems={racesItems.map((r) => ({ label: r.nom, href: `/races/${r.slug}` }))}
-          ryximusItems={ryximusItems.map((r) => ({ label: r.nom, href: `/ryximus/${r.slug}` }))}
-          isLoggedIn={!!user}
+          paysItems={paysItems.filter((p) => loggedIn || !p.isDraft).map((p) => ({ label: p.nom, href: `/pays/${p.slug}` }))}
+          racesItems={racesItems.filter((r) => loggedIn || !r.isDraft).map((r) => ({ label: r.nom, href: `/races/${r.slug}` }))}
+          ryximusItems={ryximusItems.filter((r) => loggedIn || !r.isDraft).map((r) => ({ label: r.nom, href: `/ryximus/${r.slug}` }))}
+          isLoggedIn={loggedIn}
         />
         <main className="flex-1 mx-auto w-full max-w-5xl px-6 py-10">
           {children}
