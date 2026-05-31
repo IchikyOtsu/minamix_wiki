@@ -192,7 +192,7 @@ export function AdminImagesClient({ initialImages }: Props) {
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
           {images.map((img) => (
-            <div key={img.name} className="wiki-card overflow-hidden flex flex-col">
+            <div key={img.name} className="wiki-card overflow-hidden flex flex-col" onMouseLeave={() => { if (confirmDelete === img.name && deleting !== img.name) setConfirmDelete(null) }}>
               {/* Preview */}
               <div className="aspect-square bg-gray-100 overflow-hidden shrink-0">
                 <img src={img.url} alt={img.name} className="w-full h-full object-cover" loading="lazy" />
@@ -264,14 +264,32 @@ export function AdminImagesClient({ initialImages }: Props) {
                   >
                     {img.usageCount > 0 ? `×${img.usageCount}` : '–'}
                   </button>
-                  <button
-                    onClick={() => handleDelete(img)}
-                    disabled={deleting === img.name}
-                    className="text-sm text-red-400 hover:text-red-600 transition-colors disabled:opacity-40 w-6 h-6 flex items-center justify-center rounded hover:bg-red-50"
-                    title="Supprimer"
-                  >
-                    {deleting === img.name ? '…' : '✕'}
-                  </button>
+                  {deleting === img.name ? (
+                    <span className="text-xs text-gray-400">…</span>
+                  ) : confirmDelete === img.name ? (
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => handleDelete(img)}
+                        className="text-xs px-1.5 py-0.5 bg-red-500 text-white rounded font-medium hover:bg-red-600 transition-colors"
+                      >
+                        Oui
+                      </button>
+                      <button
+                        onClick={() => setConfirmDelete(null)}
+                        className="text-xs px-1.5 py-0.5 border border-gray-300 rounded text-gray-500 hover:bg-gray-50 transition-colors"
+                      >
+                        Non
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setConfirmDelete(img.name)}
+                      className="text-sm text-red-400 hover:text-red-600 transition-colors w-6 h-6 flex items-center justify-center rounded hover:bg-red-50"
+                      title="Supprimer"
+                    >
+                      ✕
+                    </button>
+                  )}
                 </div>
 
                 {/* Expanded usage list */}
