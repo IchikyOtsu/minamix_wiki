@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { WikiEditor } from './WikiEditor'
 import { ImagePickerModal } from './ImagePickerModal'
 import { uploadImage } from '@/lib/uploadImage'
+import { addImageUrl } from '@/app/admin/actions'
 import { sanitizeName } from '@/lib/sanitize'
 import { parseTable } from '@/types/blocks'
 import type { Block, TableData } from '@/types/blocks'
@@ -106,6 +107,10 @@ function TableEditor({ data, onChange }: { data: TableData; onChange: (d: TableD
 export function BlockEditor({ blocks, onChange, onUploading }: Props) {
   const [uploading, setUploading] = useState<Record<string, boolean>>({})
   const [pickerBlockId, setPickerBlockId] = useState<string | null>(null)
+  const [urlInputBlockId, setUrlInputBlockId] = useState<string | null>(null)
+  const [urlInputName, setUrlInputName] = useState('')
+  const [urlInputValue, setUrlInputValue] = useState('')
+  const [urlSaving, setUrlSaving] = useState(false)
   const [pending, setPending] = useState<PendingUpload | null>(null)
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({})
   const blocksRef = useRef(blocks)
@@ -208,6 +213,53 @@ export function BlockEditor({ blocks, onChange, onUploading }: Props) {
                     <button type="button" onClick={cancelPending} className="px-4 py-2 rounded-lg border border-gray-300 text-gray-600 text-sm hover:bg-gray-50 transition-colors">Annuler</button>
                   </div>
                 </div>
+              ) : urlInputBlockId === b.id ? (
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <input
+                      autoFocus
+                      value={urlInputName}
+                      onChange={e => setUrlInputName(e.target.value)}
+                      placeholder="Nom (ex: Carte du monde)"
+                      className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400"
+                      disabled={urlSaving}
+                    />
+                    <input
+                      type="url"
+                      value={urlInputValue}
+                      onChange={e => setUrlInputValue(e.target.value)}
+                      placeholder="https://…"
+                      className="flex-[2] border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-blue-400"
+                      disabled={urlSaving}
+                      onKeyDown={async e => {
+                        if (e.key === 'Escape') { setUrlInputBlockId(null); setUrlInputName(''); setUrlInputValue('') }
+                      }}
+                    />
+                  </div>
+                  <div className="flex gap-2 justify-end">
+                    <button type="button" onClick={() => { setUrlInputBlockId(null); setUrlInputName(''); setUrlInputValue('') }} disabled={urlSaving} className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors">Annuler</button>
+                    <button
+                      type="button"
+                      disabled={urlSaving || !urlInputName.trim() || !urlInputValue.trim()}
+                      className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                      onClick={async () => {
+                        const name = urlInputName.trim()
+                        const url = urlInputValue.trim()
+                        if (!name || !url) return
+                        setUrlSaving(true)
+                        const result = await addImageUrl(name, url)
+                        setUrlSaving(false)
+                        if (!result.ok) { alert('Erreur : ' + result.error); return }
+                        update(b.id, { contenu: url })
+                        setUrlInputBlockId(null)
+                        setUrlInputName('')
+                        setUrlInputValue('')
+                      }}
+                    >
+                      {urlSaving ? 'Ajout…' : '🔗 Insérer'}
+                    </button>
+                  </div>
+                </div>
               ) : (
                 <div className="flex gap-2">
                   <label className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg border-2 border-dashed cursor-pointer transition-colors text-sm font-medium ${uploading[b.id] ? 'border-gray-200 text-gray-400 cursor-not-allowed' : 'border-gray-300 text-gray-500 hover:border-[var(--gold)] hover:text-gray-700'}`}>
@@ -216,6 +268,9 @@ export function BlockEditor({ blocks, onChange, onUploading }: Props) {
                   </label>
                   <button type="button" onClick={() => setPickerBlockId(b.id)} className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg border-2 border-dashed border-gray-300 text-gray-500 hover:border-[var(--gold)] hover:text-gray-700 transition-colors text-sm font-medium">
                     <span>🖼</span><span>Bibliothèque</span>
+                  </button>
+                  <button type="button" onClick={() => { setUrlInputBlockId(b.id); setUrlInputName(''); setUrlInputValue('') }} className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg border-2 border-dashed border-gray-300 text-gray-500 hover:border-[var(--gold)] hover:text-gray-700 transition-colors text-sm font-medium">
+                    <span>🔗</span><span>URL</span>
                   </button>
                 </div>
               )}

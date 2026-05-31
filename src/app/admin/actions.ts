@@ -11,6 +11,7 @@ export type ImageEntry = {
   createdAt: string
   usageCount: number
   usedIn: string[]
+  urlId?: number  // set only for URL-based images (not uploaded files)
 }
 
 export async function getImageLibrary(): Promise<ImageEntry[]> {
@@ -18,20 +19,31 @@ export async function getImageLibrary(): Promise<ImageEntry[]> {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return []
 
-  const { data: files, error } = await supabase.storage.from('images').list('', {
-    limit: 1000,
-    sortBy: { column: 'created_at', order: 'desc' },
-  })
+  const [storageResult, urlResult] = await Promise.all([
+    supabase.storage.from('images').list('', { limit: 1000, sortBy: { column: 'created_at', order: 'desc' } }),
+    supabase.from('image_urls').select('id, name, url, created_at').order('created_at', { ascending: false }),
+  ])
+
+  const { data: files, error } = storageResult
   if (error || !files) return []
 
-  const filesWithUrls = files
-    .filter((f) => f.name !== '.emptyFolderPlaceholder')
-    .map((f) => ({
-      name: f.name,
-      url: supabase.storage.from('images').getPublicUrl(f.name).data.publicUrl,
-      size: (f.metadata?.size as number) ?? 0,
-      createdAt: f.created_at ?? '',
-    }))
+  const filesWithUrls: Omit<ImageEntry, 'usageCount' | 'usedIn'>[] = [
+    ...files
+      .filter((f) => f.name !== '.emptyFolderPlaceholder')
+      .map((f) => ({
+        name: f.name,
+        url: supabase.storage.from('images').getPublicUrl(f.name).data.publicUrl,
+        size: (f.metadata?.size as number) ?? 0,
+        createdAt: f.created_at ?? '',
+      })),
+    ...(urlResult.data ?? []).map((r) => ({
+      name: r.name,
+      url: r.url as string,
+      size: 0,
+      createdAt: r.created_at ?? '',
+      urlId: r.id as number,
+    })),
+  ]
 
   const urlIndex = new Map(filesWithUrls.map((f) => [f.url, f.name]))
   const usageCounts = new Map<string, string[]>()
@@ -194,4 +206,50 @@ export async function renameImageFile(
   revalidatePath('/', 'layout')
 
   return { ok: true, newName, newUrl }
+}
+
+// ── URL images ────────────────────────────────────────────────────────────────
+
+export async function addImageUrl(
+  name: string,
+  url: string,
+): Promise<{ ok: boolean; entry?: ImageEntry; error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { ok: false, error: 'Non autorisé' }
+
+  const trimmedName = name.trim()
+  const trimmedUrl = url.trim()
+  if (!trimmedName || !trimmedUrl) return { ok: false, error: 'Nom et URL requis' }
+
+  const { data, error } = await supabase
+    .from('image_urls')
+    .upsert({ name: trimmedName, url: trimmedUrl }, { onConflict: 'url' })
+    .select('id, name, url, created_at')
+    .single()
+
+  if (error) return { ok: false, error: error.message }
+
+  return {
+    ok: true,
+    entry: {
+      name: data.name,
+      url: data.url,
+      size: 0,
+      createdAt: data.created_at ?? '',
+      usageCount: 0,
+      usedIn: [],
+      urlId: data.id,
+    },
+  }
+}
+
+export async function deleteImageUrl(id: number): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { ok: false, error: 'Non autorisé' }
+
+  const { error } = await supabase.from('image_urls').delete().eq('id', id)
+  if (error) return { ok: false, error: error.message }
+  return { ok: true }
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { deleteImageFile, getImageLibrary, renameImageFile, type ImageEntry } from './actions'
+import { addImageUrl, deleteImageFile, deleteImageUrl, getImageLibrary, renameImageFile, type ImageEntry } from './actions'
 
 function formatSize(bytes: number) {
   if (bytes < 1024) return bytes + ' B'
@@ -27,6 +27,9 @@ export function AdminImagesClient({ initialImages }: Props) {
   const [renameValue, setRenameValue] = useState('')
   const [renameSaving, setRenameSaving] = useState(false)
   const renameInputRef = useRef<HTMLInputElement>(null)
+  const [urlName, setUrlName] = useState('')
+  const [urlValue, setUrlValue] = useState('')
+  const [urlAdding, setUrlAdding] = useState(false)
 
   async function handleRefresh() {
     setRefreshing(true)
@@ -42,10 +45,24 @@ export function AdminImagesClient({ initialImages }: Props) {
     if (!confirmed) return
 
     setDeleting(img.name)
-    const result = await deleteImageFile(img.name)
+    const result = img.urlId !== undefined
+      ? await deleteImageUrl(img.urlId)
+      : await deleteImageFile(img.name)
     setDeleting(null)
     if (!result.ok) { alert('Erreur : ' + result.error); return }
     setImages((prev) => prev.filter((i) => i.name !== img.name))
+  }
+
+  async function handleAddUrl(e: React.FormEvent) {
+    e.preventDefault()
+    if (!urlName.trim() || !urlValue.trim()) return
+    setUrlAdding(true)
+    const result = await addImageUrl(urlName, urlValue)
+    setUrlAdding(false)
+    if (!result.ok) { alert('Erreur : ' + result.error); return }
+    setImages((prev) => [result.entry!, ...prev])
+    setUrlName('')
+    setUrlValue('')
   }
 
   function startRename(img: ImageEntry) {
@@ -96,6 +113,41 @@ export function AdminImagesClient({ initialImages }: Props) {
         </button>
       </div>
 
+      {/* Add by URL */}
+      <div className="mb-8 p-5 rounded-xl border border-dashed border-gray-300 bg-white">
+        <h2 className="text-sm font-semibold text-gray-700 mb-3">Ajouter une image par URL</h2>
+        <form onSubmit={handleAddUrl} className="flex flex-wrap gap-3 items-end">
+          <div className="flex-1 min-w-40">
+            <label className="block text-xs text-gray-500 mb-1">Nom affiché</label>
+            <input
+              value={urlName}
+              onChange={(e) => setUrlName(e.target.value)}
+              placeholder="ex: Carte du monde"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400"
+              required
+            />
+          </div>
+          <div className="flex-[2] min-w-60">
+            <label className="block text-xs text-gray-500 mb-1">URL de l'image</label>
+            <input
+              value={urlValue}
+              onChange={(e) => setUrlValue(e.target.value)}
+              placeholder="https://…"
+              type="url"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400 font-mono"
+              required
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={urlAdding || !urlName.trim() || !urlValue.trim()}
+            className="btn-wiki btn-wiki-primary shrink-0 disabled:opacity-60"
+          >
+            {urlAdding ? 'Ajout…' : '+ Ajouter'}
+          </button>
+        </form>
+      </div>
+
       {images.length === 0 ? (
         <div className="text-center py-24 text-gray-400 text-lg">
           Aucune image dans la bibliothèque.
@@ -111,8 +163,13 @@ export function AdminImagesClient({ initialImages }: Props) {
 
               {/* Info */}
               <div className="p-2 flex flex-col gap-1 flex-1">
-                {/* Filename — click to rename */}
-                {renaming === img.name ? (
+                {/* Filename — click to rename (not for URL images) */}
+                {img.urlId !== undefined ? (
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs bg-blue-100 text-blue-600 rounded px-1.5 py-0.5 font-medium shrink-0">🔗 URL</span>
+                    <span className="text-xs font-mono text-gray-600 truncate" title={img.name}>{img.name}</span>
+                  </div>
+                ) : renaming === img.name ? (
                   <div className="flex items-center gap-1">
                     <input
                       ref={renameInputRef}
@@ -153,7 +210,7 @@ export function AdminImagesClient({ initialImages }: Props) {
                 )}
 
                 <div className="flex items-center justify-between text-xs text-gray-400">
-                  <span>{formatSize(img.size)}</span>
+                  <span>{img.size > 0 ? formatSize(img.size) : ''}</span>
                   <span>{formatDate(img.createdAt)}</span>
                 </div>
 
