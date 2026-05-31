@@ -197,7 +197,8 @@ export function WikiEditor({ content, onChange, className = '' }: WikiEditorProp
   const insertImage = useCallback((url: string) => {
     if (!editor) return
     const style = buildImgStyle('100%', 'center')
-    editor.chain().focus().setImage({ src: url, alt: '', width: '100%', align: 'center', style } as Parameters<typeof editor.chain>[0]).run()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    editor.chain().focus().setImage({ src: url, alt: '', width: '100%', align: 'center', style } as any).run()
   }, [editor])
 
   function handleFileSelect(file: File) {
