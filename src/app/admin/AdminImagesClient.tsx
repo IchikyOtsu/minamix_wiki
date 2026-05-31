@@ -21,6 +21,7 @@ interface Props {
 export function AdminImagesClient({ initialImages }: Props) {
   const [images, setImages] = useState(initialImages)
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
   const [refreshing, setRefreshing] = useState(false)
   const [tooltip, setTooltip] = useState<string | null>(null)
   const [renaming, setRenaming] = useState<string | null>(null)
@@ -39,11 +40,7 @@ export function AdminImagesClient({ initialImages }: Props) {
   }
 
   async function handleDelete(img: ImageEntry) {
-    const confirmed = img.usageCount > 0
-      ? window.confirm(`Cette image est utilisée ${img.usageCount} fois (${img.usedIn.join(', ')}).\nSupprimer quand même ?`)
-      : window.confirm(`Supprimer « ${img.name} » ?`)
-    if (!confirmed) return
-
+    setConfirmDelete(null)
     setDeleting(img.name)
     const result = img.urlId !== undefined
       ? await deleteImageUrl(img.urlId)
