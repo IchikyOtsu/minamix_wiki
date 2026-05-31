@@ -32,7 +32,7 @@ export default function NouveauRyximusPage() {
     setSaving(true)
     const slug = toSlug(nom)
     try {
-      await upsertRyximus(slug, { nom, couleur, genre, element, image: '', personnalite: '', conditionPacte: '', blocks })
+      await upsertRyximus(slug, { nom, couleur, genre, element, image: '', personnalite: '', conditionPacte: '', blocks, isDraft: true })
       router.push(`/ryximus/${slug}`)
       router.refresh()
     } catch {

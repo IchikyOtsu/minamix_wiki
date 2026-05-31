@@ -24,7 +24,7 @@ export default function NouveauPaysPage() {
     setSaving(true)
     const slug = toSlug(nom)
     try {
-      await upsertPays(slug, { nom, couleur, blocks })
+      await upsertPays(slug, { nom, couleur, blocks, isDraft: true })
       router.push(`/pays/${slug}`)
       router.refresh()
     } catch {

@@ -26,7 +26,7 @@ export default function NouvelleRacePage() {
     setSaving(true)
     const slug = toSlug(nom)
     try {
-      await upsertRace(slug, { nom, couleur, image: '', population, esperanceVie, blocks })
+      await upsertRace(slug, { nom, couleur, image: '', population, esperanceVie, blocks, isDraft: true })
       router.push(`/races/${slug}`)
       router.refresh()
     } catch {
