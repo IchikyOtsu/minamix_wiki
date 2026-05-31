@@ -13,6 +13,11 @@ export async function uploadImage(formData: FormData): Promise<UploadResult> {
   const file = formData.get('file') as File | null
   if (!file) return { ok: false, error: 'Aucun fichier' }
 
+  const SERVER_MAX_BYTES = 5 * 1024 * 1024
+  if (file.size > SERVER_MAX_BYTES) {
+    return { ok: false, error: `Fichier trop volumineux côté serveur (${(file.size / 1024 / 1024).toFixed(1)} Mo). Maximum : 5 Mo.` }
+  }
+
   const customBase = (formData.get('name') as string | null)?.trim()
   const ext = '.' + (file.name.split('.').pop()?.toLowerCase() ?? 'jpg')
 

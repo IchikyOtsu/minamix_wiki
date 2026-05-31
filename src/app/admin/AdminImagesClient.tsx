@@ -91,26 +91,66 @@ export function AdminImagesClient({ initialImages }: Props) {
     setRenaming(null)
   }
 
+  const QUOTA_BYTES = 50 * 1024 * 1024
   const totalSize = images.reduce((sum, i) => sum + i.size, 0)
+  const usedPct = Math.min((totalSize / QUOTA_BYTES) * 100, 100)
   const unused = images.filter((i) => i.usageCount === 0).length
+
+  const barColor =
+    usedPct >= 90 ? '#ef4444' :
+    usedPct >= 70 ? '#f59e0b' :
+    '#22c55e'
+
+  const barBg =
+    usedPct >= 90 ? '#fee2e2' :
+    usedPct >= 70 ? '#fef3c7' :
+    '#dcfce7'
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Header */}
-      <div className="flex flex-wrap items-start justify-between gap-4 mb-8">
+      <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
         <div>
           <h1 className="text-3xl font-bold mb-1" style={{ fontFamily: 'var(--font-heading)' }}>
             Bibliothèque d'images
           </h1>
           <div className="flex gap-4 text-sm text-gray-500">
             <span>{images.length} image{images.length !== 1 ? 's' : ''}</span>
-            <span>{formatSize(totalSize)}</span>
             {unused > 0 && <span className="text-amber-500">{unused} non utilisée{unused !== 1 ? 's' : ''}</span>}
           </div>
         </div>
         <button onClick={handleRefresh} disabled={refreshing} className="btn-wiki btn-wiki-ghost text-sm">
           {refreshing ? 'Actualisation…' : '↺ Actualiser'}
         </button>
+      </div>
+
+      {/* Storage usage bar */}
+      <div className="mb-8 p-4 rounded-xl border" style={{ backgroundColor: barBg, borderColor: barColor + '55' }}>
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm font-semibold" style={{ color: barColor }}>
+            Stockage utilisé
+          </span>
+          <span className="text-sm font-mono" style={{ color: barColor }}>
+            {formatSize(totalSize)} / {formatSize(QUOTA_BYTES)}
+            <span className="ml-2 text-xs opacity-70">({usedPct.toFixed(1)}%)</span>
+          </span>
+        </div>
+        <div className="h-3 rounded-full overflow-hidden" style={{ backgroundColor: barColor + '33' }}>
+          <div
+            className="h-full rounded-full transition-all duration-500"
+            style={{ width: `${usedPct}%`, backgroundColor: barColor }}
+          />
+        </div>
+        {usedPct >= 90 && (
+          <p className="mt-2 text-xs font-medium" style={{ color: barColor }}>
+            ⚠️ Quota presque atteint — supprime les images inutilisées ou passe à un plan supérieur.
+          </p>
+        )}
+        {usedPct >= 70 && usedPct < 90 && (
+          <p className="mt-2 text-xs" style={{ color: barColor }}>
+            Quota bientôt atteint ({formatSize(QUOTA_BYTES - totalSize)} restants).
+          </p>
+        )}
       </div>
 
       {/* Add by URL */}

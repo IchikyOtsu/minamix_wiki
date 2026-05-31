@@ -5,6 +5,7 @@ import { WikiEditor } from './WikiEditor'
 import { ImagePickerModal } from './ImagePickerModal'
 import { uploadImage } from '@/lib/uploadImage'
 import { addImageUrl } from '@/app/admin/actions'
+import { compressImageFile } from '@/lib/compressImage'
 import { sanitizeName } from '@/lib/sanitize'
 import { parseTable } from '@/types/blocks'
 import type { Block, TableData } from '@/types/blocks'
@@ -139,6 +140,10 @@ export function BlockEditor({ blocks, onChange, onUploading }: Props) {
   }
 
   function handleFileSelect(blockId: string, file: File) {
+    if (file.size > 15 * 1024 * 1024) {
+      alert(`Fichier trop volumineux (${(file.size / 1024 / 1024).toFixed(1)} Mo). La limite est 15 Mo.`)
+      return
+    }
     if (pending) URL.revokeObjectURL(pending.previewUrl)
     const clean = sanitizeName(file.name)
     const lastDot = clean.lastIndexOf('.')
@@ -151,12 +156,15 @@ export function BlockEditor({ blocks, onChange, onUploading }: Props) {
 
   async function confirmUpload() {
     if (!pending) return
-    const { blockId, file, name, ext } = pending
+    const { blockId, name, ext } = pending
+    const originalFile = pending.file
     setPending(null)
     setUploading(u => ({ ...u, [blockId]: true }))
     try {
+      const compressed = await compressImageFile(originalFile)
+      if (compressed.error) { alert(compressed.error); return }
       const fd = new FormData()
-      fd.append('file', file)
+      fd.append('file', compressed.file!, name.trim() + ext || 'image')
       fd.append('name', name.trim() || 'image')
       const result = await uploadImage(fd)
       if (!result.ok) { alert('Erreur upload : ' + result.error); return }

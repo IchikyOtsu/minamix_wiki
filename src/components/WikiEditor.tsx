@@ -10,6 +10,7 @@ import TiptapImage from '@tiptap/extension-image'
 import Link from '@tiptap/extension-link'
 import { ImagePickerModal } from './ImagePickerModal'
 import { uploadImage } from '@/lib/uploadImage'
+import { compressImageFile } from '@/lib/compressImage'
 import { sanitizeName } from '@/lib/sanitize'
 
 // ── Image style helpers ───────────────────────────────────────────────────────
@@ -202,6 +203,10 @@ export function WikiEditor({ content, onChange, className = '' }: WikiEditorProp
   }, [editor])
 
   function handleFileSelect(file: File) {
+    if (file.size > 15 * 1024 * 1024) {
+      alert(`Fichier trop volumineux (${(file.size / 1024 / 1024).toFixed(1)} Mo). La limite est 15 Mo.`)
+      return
+    }
     if (pending) URL.revokeObjectURL(pending.previewUrl)
     const clean = sanitizeName(file.name)
     const lastDot = clean.lastIndexOf('.')
@@ -218,8 +223,10 @@ export function WikiEditor({ content, onChange, className = '' }: WikiEditorProp
     if (!pending) return
     setUploading(true)
     try {
+      const compressed = await compressImageFile(pending.file)
+      if (compressed.error) { alert(compressed.error); return }
       const fd = new FormData()
-      fd.append('file', pending.file)
+      fd.append('file', compressed.file!, pending.name.trim() + pending.ext || 'image')
       fd.append('name', pending.name.trim() || 'image')
       const result = await uploadImage(fd)
       if (!result.ok) { alert('Erreur upload : ' + result.error); return }
