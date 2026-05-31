@@ -101,6 +101,7 @@ export async function deleteImageFile(name: string): Promise<{ ok: boolean; erro
 
   const { error } = await supabase.storage.from('images').remove([name])
   if (error) return { ok: false, error: error.message }
+  revalidatePath('/', 'layout')
   return { ok: true }
 }
 
@@ -251,5 +252,6 @@ export async function deleteImageUrl(id: number): Promise<{ ok: boolean; error?:
 
   const { error } = await supabase.from('image_urls').delete().eq('id', id)
   if (error) return { ok: false, error: error.message }
+  revalidatePath('/', 'layout')
   return { ok: true }
 }
